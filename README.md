@@ -61,7 +61,7 @@ Configuration allows:
 
 Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
 
-![toggle-movement-mod](doc/img/ToggleMovementMod.png)
+![toggle-movement-mod](https://github.com/afilbert/valheim-toggle-movement-mod/blob/main/doc/img/ToggleMovementMod.png)
 
 ### Releases
 
