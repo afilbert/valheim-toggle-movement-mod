@@ -61,10 +61,11 @@ Configuration allows:
 
 Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
 
-![toggle-movement-mod](https://github.com/afilbert/valheim-toggle-movement-mod/blob/main/doc/img/ToggleMovementMod.png)
+![toggle-movement-mod](https://raw.githubusercontent.com/afilbert/valheim-toggle-movement-mod/main/doc/img/ToggleMovementMod.png)
 
 ### Releases
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 0.0.2 Fix README hero link
 * 0.0.1 Initial publication
