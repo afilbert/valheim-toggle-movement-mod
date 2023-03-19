@@ -1,4 +1,4 @@
-# Valheim - Toggle Movement Mod
+# Valheim - Toggle Movement Mod (ToMoMo)
 
 **_Works with Mistlands Update!_**
 
