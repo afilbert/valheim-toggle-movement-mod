@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ValheimMovementMods
@@ -13,7 +14,7 @@ namespace ValheimMovementMods
     {
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "0.0.1";
+		const string pluginVersion = "0.0.3";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -23,15 +24,18 @@ namespace ValheimMovementMods
 
 		public static ConfigEntry<bool> EnableToggle;
 		public static ConfigEntry<bool> SprintToggle;
+		public static ConfigEntry<bool> DisableStamLimitOnManualCntrl;
 		public static ConfigEntry<bool> AutorunOverride;
 		public static ConfigEntry<string> AutorunFreelookKey;
 		public static ConfigEntry<bool> RunToCrouchToggle;
 		public static ConfigEntry<bool> StopSneakMovementToggle;
 		public static ConfigEntry<float> MinStamRefillPercent;
+		public static ConfigEntry<bool> SafeguardStaminaOnLowHealth;
+		public static ConfigEntry<float> SprintHealthOverride;
 
 		public static bool StaminaRefilling = false, SprintSet = false, AutorunSet = false;
 		public static bool RunToCrouch = false, Crouching = false;
-		public static float StamRefillThreshold = 0f;
+		public static float StamRefillThreshold = 0f, SprintHealthThreshold = 0f;
 
 		void Awake()
         {
@@ -39,12 +43,16 @@ namespace ValheimMovementMods
 			logger = Logger;
 			EnableToggle = Config.Bind<bool>("Mod Config", "Enable", true, "Enable this mod");
 			SprintToggle = Config.Bind<bool>("Sprint", "SprintToggle", true, "Sprint works like a toggle when true");
-			AutorunOverride = Config.Bind<bool>("Autorun", "AutorunToggle", true, "Fixes auto-run to follow look direction");
-			AutorunFreelookKey = Config.Bind<string>("Autorun", "AutorunFreelookKey", "CapsLock", "Overrides look direction in auto-run while pressed");
-			RunToCrouchToggle = Config.Bind<bool>("Crouch", "RunToCrouchToggle", true, "Allows going from full run to crouch with a click of the crouch button (and vice versa)");
-			StopSneakMovementToggle = Config.Bind<bool>("Crouch", "StopSneakOnNoStam", true, "Stops sneak movement if no stamina available. Stock behavior is to pop out of sneak into walk");
+			AutorunOverride = Config.Bind<bool>("Auto-run", "AutorunToggle", true, "Fixes auto-run to follow look direction");
+			AutorunFreelookKey = Config.Bind<string>("Auto-run", "AutorunFreelookKey", "CapsLock", "Overrides look direction in auto-run while pressed");
+			RunToCrouchToggle = Config.Bind<bool>("Auto-sneak", "RunToCrouchToggle", true, "Allows going from full run to crouch with a click of the crouch button (and vice versa)");
+			StopSneakMovementToggle = Config.Bind<bool>("Auto-sneak", "StopSneakOnNoStam", true, "Stops sneak movement if no stamina available. Stock behavior is to pop out of sneak into walk");
 			MinStamRefillPercent = Config.Bind<float>("Stamina", "MinStamRefillPercentValue", 20f, "Percentage to stop running and let stamina refill");
+			DisableStamLimitOnManualCntrl = Config.Bind<bool>("Stamina", "StopStamLimitOnManualInputToggle", true, "Stops the wait for 100% stam fill to resume sprinting on manual direction input");
 			StamRefillThreshold = MinStamRefillPercent.Value / 100f;
+			SafeguardStaminaOnLowHealth = Config.Bind<bool>("Stamina", "SafeguardStaminaOnLowHealthToggle", true, "Allow stamina to recover on low health by automatically detoggling sprint");
+			SprintHealthOverride = Config.Bind<float>("Stamina", "SprintHealthOverridePercentValue", 30f, "Percentage of health to detoggle sprint so stamina can start to recover");
+			SprintHealthThreshold = SprintHealthOverride.Value / 100f;
 
 			_harmony.PatchAll();
         }
@@ -52,8 +60,8 @@ namespace ValheimMovementMods
         [HarmonyPatch(typeof(Player), "SetControls")]
         private class ToggleMovement
         {
-            private static void Prefix(ref Player __instance, ref bool run, ref bool autoRun, ref bool crouch, ref Vector3 movedir, ref Vector3 ___m_lookDir, ref Vector3 ___m_moveDir, ref bool ___m_autoRun, ref bool ___m_crouchToggled, ref bool ___m_attached)
-            {				
+            private static void Prefix(ref Player __instance, ref bool run, ref bool autoRun, ref bool crouch, ref Vector3 ___m_lookDir, ref Vector3 ___m_moveDir, ref bool ___m_autoRun, ref bool ___m_crouchToggled, ref string ___m_actionAnimation, ref List<Player.MinorActionData> ___m_actionQueue)
+            {
 				if (!__instance || _plugin.IsInMenu() || !EnableToggle.Value)
 				{
 					autoRun = false;
@@ -65,9 +73,37 @@ namespace ValheimMovementMods
 				{
 					Started = true;
 				}
+
+				bool forwardDown = ZInput.GetButton("Forward") || ZInput.GetButton("JoyForward");
+				bool backwardDown = ZInput.GetButton("Backward") || ZInput.GetButton("JoyBackward");
+				bool leftDown = ZInput.GetButton("Left") || ZInput.GetButton("JoyLeft");
+				bool rightDown = ZInput.GetButton("Right") || ZInput.GetButton("JoyRight");
+
+				bool directionalDown = forwardDown || backwardDown || leftDown || rightDown;
+
+				bool isWeaponLoaded = true;
 				autoRun = false;
 				___m_autoRun = false;
-				if (AutorunSet && !___m_autoRun)
+
+				bool equipmentAnimating = ___m_actionAnimation != null;
+
+				if (___m_actionQueue.Exists(item => (item.m_type == Player.MinorActionData.ActionType.Equip)))
+				{
+					equipmentAnimating = true;
+				}
+				if (AutorunSet && AutorunOverride.Value && (directionalDown))
+				{
+					AutorunSet = false;
+				}
+				if (DisableStamLimitOnManualCntrl.Value && (directionalDown) && StaminaRefilling)
+				{
+					StaminaRefilling = false;
+				}
+				if (__instance.GetCurrentWeapon() != null && __instance.GetCurrentWeapon().m_shared.m_name == "$item_crossbow_arbalest")
+                {
+					isWeaponLoaded = __instance.IsWeaponLoaded();
+				}
+				if (AutorunSet && !___m_autoRun && !equipmentAnimating)
 				{
 					___m_autoRun = true;
 				}
@@ -97,7 +133,11 @@ namespace ValheimMovementMods
 				} 
 				else
                 {
-					if (SprintSet && !StaminaRefilling)
+					if (__instance.GetHealthPercentage() < SprintHealthThreshold && SafeguardStaminaOnLowHealth.Value)
+                    {
+						SprintSet = false;
+                    }
+					if (SprintSet && (!StaminaRefilling || (directionalDown && DisableStamLimitOnManualCntrl.Value)) && isWeaponLoaded && !equipmentAnimating)
 					{
 						run = true;
 						crouch = false;
@@ -136,11 +176,6 @@ namespace ValheimMovementMods
 				bool crouch = ZInput.GetButtonDown("Crouch") || ZInput.GetButtonDown("JoyCrouch");
 				bool autoRun = ZInput.GetButtonDown("AutoRun");
 
-				bool forwardDown = ZInput.GetButtonDown("Forward") || ZInput.GetButtonDown("JoyForward");
-				bool backwardDown = ZInput.GetButtonDown("Backward") || ZInput.GetButtonDown("JoyBackward");
-				bool leftDown = ZInput.GetButtonDown("Left") || ZInput.GetButtonDown("JoyLeft");
-				bool rightDown = ZInput.GetButtonDown("Right") || ZInput.GetButtonDown("JoyRight");
-
 				if (!AutorunOverride.Value)
                 {
 					AutorunSet = false;
@@ -165,11 +200,7 @@ namespace ValheimMovementMods
                 {
 					Crouching = !Crouching;
 				}
-                if (AutorunSet && AutorunOverride.Value && (forwardDown || backwardDown || leftDown || rightDown))
-                {
-                    AutorunSet = false;
-                }
-            }
+			}
 		}
 	}
 }
