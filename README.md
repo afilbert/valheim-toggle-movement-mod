@@ -85,10 +85,11 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 0.0.4 Unequip weapons while sprinting
 * 0.0.3 More QOL improvements. Bump build version number.
   * Temporarily disables sprint toggle while Arbalest is reloading.
   * Toggle sprint off if health reduces to less than threshold (30% by default)
-  * Allow switching weapons while auto-run sprinting
+  * Allow switching weapons while sprinting
   * Fixes issue preventing sprinting until 100% stam refill, even after manual intervention.
 * 0.0.2 Fix README hero link
 * 0.0.1 Initial publication
