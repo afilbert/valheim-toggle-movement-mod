@@ -14,7 +14,7 @@ namespace ValheimMovementMods
     {
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "0.0.3";
+		const string pluginVersion = "0.0.4";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -87,7 +87,7 @@ namespace ValheimMovementMods
 
 				bool equipmentAnimating = ___m_actionAnimation != null;
 
-				if (___m_actionQueue.Exists(item => (item.m_type == Player.MinorActionData.ActionType.Equip)))
+				if (___m_actionQueue.Exists(item => (item.m_type == Player.MinorActionData.ActionType.Equip || item.m_type == Player.MinorActionData.ActionType.Unequip)))
 				{
 					equipmentAnimating = true;
 				}
