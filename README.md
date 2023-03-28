@@ -14,7 +14,7 @@ Have you ever played so much Valheim that you injured yourself? Well, I did. Whe
 * Auto-sneak while crouching safeguards stamina regen at threshold (20% by default)
 * Seamlessly auto-run directly into auto-sneak (and vice versa)
 * Jumping doesn't cancel auto-run
-* Regain manual control of auto-run/sneak at any time by using directional input
+* Regain manual control of auto-run/sneak at any time by using directional input (or Back key/button if AutorunStrafe enabled)
 * Sprinting will temporarily and automatically pause while Arbalest is reloading
 * Auto-run sprinting will temporarily and automatically pause to allow equipping/switching weapons
 * Sprint will detoggle if health less than threshold (30% by default)
@@ -44,7 +44,7 @@ This mod fixes all that seamlessly, and installs stamina safeguards while auto-r
 
 * The default stamina safeguard is 20%
 * When auto-running, you will transition to a walk until stamina fully regenerates 
-  * Stamina regen can be overridden if needed by holding your Run key/button or directional inputs
+  * Stamina regen can be overridden if needed by holding your Run key/button or Forward key/button
 * When auto-sneaking, you will simply stop while crouched until stamina fully regenerates
   * Stamina regen can be overridden if needed by holding your directional input keys while crouching
 
@@ -70,10 +70,11 @@ Configuration allows:
 * **SprintToggle**, Sprint works like a toggle, default: true
 * **AutorunToggle**, Fixes auto-run to follow look, default: true
 * **AutorunFreelookKey**, Overrides look direction in auto-run while pressed, default: CapsLock
+* **AutorunStrafe**, Enable strafing while in auto-run/crouch, default: true
 * **RunToCrouchToggle**, Go from run to crouch with the click of a button, default: true
 * **StopSneakOnNoStam**, Stops sneak movement if no stamina available, default: true
 * **MinStamRefillPercentValue**, Percentage to stop running/sneaking and let stamina refill, default: 20%
-* **StopStamLimitOnManualInputToggle**, Stops the wait for 100% stam fill to resume sprinting on manual directional input (forward, back, left, right), default: true
+* **StopStamLimitOnManualInputToggle**, Stops the wait for 100% stam fill to resume sprinting on manual Forward input, default: true
 * **SafeguardStaminaOnLowHealthToggle**", Allow stamina to recover on low health by automatically detoggling sprint, default: true
 * **SprintHealthOverridePercentValue**, Percentage of health to detoggle sprint so stamina can start to recover, default: 30%
 
@@ -85,11 +86,12 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 0.0.5 Strafe while auto-running/sneaking
 * 0.0.4 Unequip weapons while sprinting
-* 0.0.3 More QOL improvements. Bump build version number.
-  * Temporarily disables sprint toggle while Arbalest is reloading.
+* 0.0.3 More QOL improvements. Bump build version number
+  * Temporarily disables sprint toggle while Arbalest is reloading
   * Toggle sprint off if health reduces to less than threshold (30% by default)
   * Allow switching weapons while sprinting
-  * Fixes issue preventing sprinting until 100% stam refill, even after manual intervention.
+  * Fixes issue preventing sprinting until 100% stam refill, even after manual intervention
 * 0.0.2 Fix README hero link
 * 0.0.1 Initial publication

@@ -14,7 +14,7 @@ namespace ValheimMovementMods
     {
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "0.0.4";
+		const string pluginVersion = "0.0.5";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -27,6 +27,7 @@ namespace ValheimMovementMods
 		public static ConfigEntry<bool> DisableStamLimitOnManualCntrl;
 		public static ConfigEntry<bool> AutorunOverride;
 		public static ConfigEntry<string> AutorunFreelookKey;
+		public static ConfigEntry<bool> AutorunStrafe;
 		public static ConfigEntry<bool> RunToCrouchToggle;
 		public static ConfigEntry<bool> StopSneakMovementToggle;
 		public static ConfigEntry<float> MinStamRefillPercent;
@@ -37,31 +38,35 @@ namespace ValheimMovementMods
 		public static bool RunToCrouch = false, Crouching = false;
 		public static float StamRefillThreshold = 0f, SprintHealthThreshold = 0f;
 
+		//public static Player PlayerInstance = null;
+		//public static ItemDrop.ItemData EquippedItem = null;
+
 		void Awake()
-        {
+		{
 			_plugin = this;
 			logger = Logger;
 			EnableToggle = Config.Bind<bool>("Mod Config", "Enable", true, "Enable this mod");
 			SprintToggle = Config.Bind<bool>("Sprint", "SprintToggle", true, "Sprint works like a toggle when true");
 			AutorunOverride = Config.Bind<bool>("Auto-run", "AutorunToggle", true, "Fixes auto-run to follow look direction");
 			AutorunFreelookKey = Config.Bind<string>("Auto-run", "AutorunFreelookKey", "CapsLock", "Overrides look direction in auto-run while pressed");
+			AutorunStrafe = Config.Bind<bool>("Auto-run", "AutorunStrafe", true, "Enable strafing while in auto-run/crouch");
 			RunToCrouchToggle = Config.Bind<bool>("Auto-sneak", "RunToCrouchToggle", true, "Allows going from full run to crouch with a click of the crouch button (and vice versa)");
 			StopSneakMovementToggle = Config.Bind<bool>("Auto-sneak", "StopSneakOnNoStam", true, "Stops sneak movement if no stamina available. Stock behavior is to pop out of sneak into walk");
 			MinStamRefillPercent = Config.Bind<float>("Stamina", "MinStamRefillPercentValue", 20f, "Percentage to stop running and let stamina refill");
-			DisableStamLimitOnManualCntrl = Config.Bind<bool>("Stamina", "StopStamLimitOnManualInputToggle", true, "Stops the wait for 100% stam fill to resume sprinting on manual direction input");
+			DisableStamLimitOnManualCntrl = Config.Bind<bool>("Stamina", "StopStamLimitOnManualInputToggle", true, "Stops the wait for 100% stam fill to resume sprinting on manual Forward input");
 			StamRefillThreshold = MinStamRefillPercent.Value / 100f;
 			SafeguardStaminaOnLowHealth = Config.Bind<bool>("Stamina", "SafeguardStaminaOnLowHealthToggle", true, "Allow stamina to recover on low health by automatically detoggling sprint");
 			SprintHealthOverride = Config.Bind<float>("Stamina", "SprintHealthOverridePercentValue", 30f, "Percentage of health to detoggle sprint so stamina can start to recover");
 			SprintHealthThreshold = SprintHealthOverride.Value / 100f;
 
 			_harmony.PatchAll();
-        }
+		}
 
-        [HarmonyPatch(typeof(Player), "SetControls")]
-        private class ToggleMovement
-        {
-            private static void Prefix(ref Player __instance, ref bool run, ref bool autoRun, ref bool crouch, ref Vector3 ___m_lookDir, ref Vector3 ___m_moveDir, ref bool ___m_autoRun, ref bool ___m_crouchToggled, ref string ___m_actionAnimation, ref List<Player.MinorActionData> ___m_actionQueue)
-            {
+		[HarmonyPatch(typeof(Player), "SetControls")]
+		private class ToggleMovement
+		{
+			private static void Prefix(ref Player __instance, ref Vector3 movedir, ref bool run, ref bool autoRun, ref bool crouch, ref Vector3 ___m_lookDir, ref Vector3 ___m_moveDir, ref bool ___m_autoRun, ref bool ___m_crouchToggled, ref string ___m_actionAnimation, ref List<Player.MinorActionData> ___m_actionQueue)
+			{
 				if (!__instance || _plugin.IsInMenu() || !EnableToggle.Value)
 				{
 					autoRun = false;
@@ -79,7 +84,15 @@ namespace ValheimMovementMods
 				bool leftDown = ZInput.GetButton("Left") || ZInput.GetButton("JoyLeft");
 				bool rightDown = ZInput.GetButton("Right") || ZInput.GetButton("JoyRight");
 
-				bool directionalDown = forwardDown || backwardDown || leftDown || rightDown;
+				bool directionalDown = false;
+
+				if (AutorunStrafe.Value)
+                {
+					directionalDown = backwardDown;
+                } else
+                {
+					directionalDown = forwardDown || backwardDown || leftDown || rightDown;
+				}
 
 				bool isWeaponLoaded = true;
 				autoRun = false;
@@ -109,8 +122,18 @@ namespace ValheimMovementMods
 				}
 				if (___m_autoRun && (AutorunOverride.Value && !ZInput.GetButton("Caps")))
 				{
-					___m_moveDir.x = ___m_lookDir.x;
-					___m_moveDir.z = ___m_lookDir.z;
+                    if (AutorunStrafe.Value)
+                    {
+                        Vector3 lookDir = ___m_lookDir;
+                        lookDir.y = 0f;
+                        lookDir.Normalize();
+						___m_moveDir = lookDir + movedir.x * Vector3.Cross(Vector3.up, lookDir);
+                    }
+                    else
+                    {
+                        ___m_moveDir.x = ___m_lookDir.x;
+                        ___m_moveDir.z = ___m_lookDir.z;
+                    }
 				}
 				if (__instance.GetStaminaPercentage() < StamRefillThreshold)
 				{
@@ -137,7 +160,7 @@ namespace ValheimMovementMods
                     {
 						SprintSet = false;
                     }
-					if (SprintSet && (!StaminaRefilling || (directionalDown && DisableStamLimitOnManualCntrl.Value)) && isWeaponLoaded && !equipmentAnimating)
+					if (SprintSet && (!StaminaRefilling || (forwardDown && DisableStamLimitOnManualCntrl.Value)) && isWeaponLoaded && !equipmentAnimating)
 					{
 						run = true;
 						crouch = false;
