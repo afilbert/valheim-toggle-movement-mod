@@ -8,10 +8,10 @@ using UnityEngine;
 
 namespace ValheimMovementMods
 {
-    [BepInPlugin(pluginGUID, pluginName, pluginVersion)]
-    [BepInProcess("valheim.exe")]
-    public class ToggleMovementMod : BaseUnityPlugin
-    {
+	[BepInPlugin(pluginGUID, pluginName, pluginVersion)]
+	[BepInProcess("valheim.exe")]
+	public class ToggleMovementMod : BaseUnityPlugin
+	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
 		const string pluginVersion = "0.0.5";
@@ -87,10 +87,11 @@ namespace ValheimMovementMods
 				bool directionalDown = false;
 
 				if (AutorunStrafe.Value)
-                {
+				{
 					directionalDown = backwardDown;
-                } else
-                {
+				}
+				else
+				{
 					directionalDown = forwardDown || backwardDown || leftDown || rightDown;
 				}
 
@@ -113,7 +114,7 @@ namespace ValheimMovementMods
 					StaminaRefilling = false;
 				}
 				if (__instance.GetCurrentWeapon() != null && __instance.GetCurrentWeapon().m_shared.m_name == "$item_crossbow_arbalest")
-                {
+				{
 					isWeaponLoaded = __instance.IsWeaponLoaded();
 				}
 				if (AutorunSet && !___m_autoRun && !equipmentAnimating)
@@ -122,18 +123,18 @@ namespace ValheimMovementMods
 				}
 				if (___m_autoRun && (AutorunOverride.Value && !ZInput.GetButton("Caps")))
 				{
-                    if (AutorunStrafe.Value)
-                    {
-                        Vector3 lookDir = ___m_lookDir;
-                        lookDir.y = 0f;
-                        lookDir.Normalize();
+					if (AutorunStrafe.Value)
+					{
+						Vector3 lookDir = ___m_lookDir;
+						lookDir.y = 0f;
+						lookDir.Normalize();
 						___m_moveDir = lookDir + movedir.x * Vector3.Cross(Vector3.up, lookDir);
-                    }
-                    else
-                    {
-                        ___m_moveDir.x = ___m_lookDir.x;
-                        ___m_moveDir.z = ___m_lookDir.z;
-                    }
+					}
+					else
+					{
+						___m_moveDir.x = ___m_lookDir.x;
+						___m_moveDir.z = ___m_lookDir.z;
+					}
 				}
 				if (__instance.GetStaminaPercentage() < StamRefillThreshold)
 				{
@@ -144,22 +145,22 @@ namespace ValheimMovementMods
 					StaminaRefilling = false;
 				}
 				if (Crouching)
-                {
+				{
 					run = false;
 					___m_crouchToggled = true;
 					crouch = false;
 					if (StaminaRefilling && AutorunSet && StopSneakMovementToggle.Value)
-                    {
+					{
 						autoRun = false;
 						___m_autoRun = false;
-                    }
+					}
 				} 
 				else
-                {
+				{
 					if (__instance.GetHealthPercentage() < SprintHealthThreshold && SafeguardStaminaOnLowHealth.Value)
-                    {
+					{
 						SprintSet = false;
-                    }
+					}
 					if (SprintSet && (!StaminaRefilling || (forwardDown && DisableStamLimitOnManualCntrl.Value)) && isWeaponLoaded && !equipmentAnimating)
 					{
 						run = true;
@@ -167,7 +168,7 @@ namespace ValheimMovementMods
 					}
 				}
 			}
-        }
+		}
 
 		[HarmonyPatch(typeof(ZInput), "Reset")]
 		private class ZInput_PatchReset
@@ -187,40 +188,40 @@ namespace ValheimMovementMods
 		}
 
 		private bool IsInMenu()
-        {
+		{
 			return ZInput.GetButtonDown("Esc") || ZInput.GetButtonDown("JoyMenu") || InventoryGui.IsVisible() || Minimap.IsOpen() || Console.IsVisible() || TextInput.IsVisible() || ZNet.instance.InPasswordDialog() || StoreGui.IsVisible() || Hud.IsPieceSelectionVisible() || UnifiedPopup.IsVisible();
 		}
 
 		private void Update()
 		{
 			if (Started && EnableToggle.Value && !IsInMenu())
-            {
+			{
 				bool run = ZInput.GetButtonUp("Run") || ZInput.GetButtonUp("JoyRun");
 				bool crouch = ZInput.GetButtonDown("Crouch") || ZInput.GetButtonDown("JoyCrouch");
 				bool autoRun = ZInput.GetButtonDown("AutoRun");
 
 				if (!AutorunOverride.Value)
-                {
+				{
 					AutorunSet = false;
 				}
 				if(!RunToCrouchToggle.Value)
-                {
+				{
 					RunToCrouch = false;
-                }
-				if(!SprintToggle.Value)
-                {
+				}
+				if (!SprintToggle.Value)
+				{
 					SprintSet = false;
-                }
+				}
 				if (autoRun && AutorunOverride.Value)
 				{
 					AutorunSet = !AutorunSet;
 				}
 				if (run && SprintToggle.Value)
-                {
+				{
 					SprintSet = !SprintSet;
-                }
+				}
 				if (crouch && RunToCrouchToggle.Value)
-                {
+				{
 					Crouching = !Crouching;
 				}
 			}
