@@ -200,6 +200,8 @@ namespace ValheimMovementMods
 				bool crouch = ZInput.GetButtonDown("Crouch") || ZInput.GetButtonDown("JoyCrouch");
 				bool autoRun = ZInput.GetButtonDown("AutoRun");
 
+				bool backwardDown = ZInput.GetButton("Backward") || ZInput.GetButton("JoyBackward");
+
 				if (!AutorunOverride.Value)
 				{
 					AutorunSet = false;
@@ -224,6 +226,11 @@ namespace ValheimMovementMods
 				{
 					Crouching = !Crouching;
 				}
+
+				if (AutorunSet && backwardDown)
+                {
+					AutorunSet = false;
+                }
 			}
 		}
 	}
