@@ -18,6 +18,7 @@ Have you ever played so much Valheim that you injured yourself? Well, I did. Whe
 * Sprinting will temporarily and automatically pause while Arbalest is reloading
 * Auto-run sprinting will temporarily and automatically pause to allow equipping/switching weapons
 * Sprint will detoggle if health less than threshold (30% by default)
+* Weapons will auto-reequip on exiting swim state if stowed while swimming
 * Fully configurable
 
 ## QOL Detail
