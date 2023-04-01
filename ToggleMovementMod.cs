@@ -14,7 +14,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "0.0.5";
+		const string pluginVersion = "0.0.6";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -28,6 +28,7 @@ namespace ValheimMovementMods
 		public static ConfigEntry<bool> AutorunOverride;
 		public static ConfigEntry<string> AutorunFreelookKey;
 		public static ConfigEntry<bool> AutorunStrafe;
+		public static ConfigEntry<bool> ReequipWeaponAfterSwimming;
 		public static ConfigEntry<bool> RunToCrouchToggle;
 		public static ConfigEntry<bool> StopSneakMovementToggle;
 		public static ConfigEntry<float> MinStamRefillPercent;
@@ -38,8 +39,8 @@ namespace ValheimMovementMods
 		public static bool RunToCrouch = false, Crouching = false;
 		public static float StamRefillThreshold = 0f, SprintHealthThreshold = 0f;
 
-		//public static Player PlayerInstance = null;
-		//public static ItemDrop.ItemData EquippedItem = null;
+		public static ItemDrop.ItemData EquippedItem = null;
+		public static ItemDrop.ItemData ReequipItem = null;
 
 		void Awake()
 		{
@@ -50,6 +51,7 @@ namespace ValheimMovementMods
 			AutorunOverride = Config.Bind<bool>("Auto-run", "AutorunToggle", true, "Fixes auto-run to follow look direction");
 			AutorunFreelookKey = Config.Bind<string>("Auto-run", "AutorunFreelookKey", "CapsLock", "Overrides look direction in auto-run while pressed");
 			AutorunStrafe = Config.Bind<bool>("Auto-run", "AutorunStrafe", true, "Enable strafing while in auto-run/crouch");
+			ReequipWeaponAfterSwimming = Config.Bind<bool>("Swim", "ReequipWeaponAfterSwimming", true, "Any weapon stowed in order to swim will reequip once out of swimming state");
 			RunToCrouchToggle = Config.Bind<bool>("Auto-sneak", "RunToCrouchToggle", true, "Allows going from full run to crouch with a click of the crouch button (and vice versa)");
 			StopSneakMovementToggle = Config.Bind<bool>("Auto-sneak", "StopSneakOnNoStam", true, "Stops sneak movement if no stamina available. Stock behavior is to pop out of sneak into walk");
 			MinStamRefillPercent = Config.Bind<float>("Stamina", "MinStamRefillPercentValue", 20f, "Percentage to stop running and let stamina refill");
@@ -85,6 +87,21 @@ namespace ValheimMovementMods
 				bool rightDown = ZInput.GetButton("Right") || ZInput.GetButton("JoyRight");
 
 				bool directionalDown = false;
+
+				if (ReequipWeaponAfterSwimming.Value && EquippedItem != null && EquippedItem.m_shared.m_name != "Unarmed" && __instance.InLiquidSwimDepth())
+				{
+					ReequipItem = EquippedItem;
+				}
+				else
+				{
+					if (ReequipWeaponAfterSwimming.Value && ReequipItem != null && !__instance.InLiquidSwimDepth())
+					{
+						__instance.EquipItem(ReequipItem);
+						ReequipItem = null;
+					}
+				}
+
+				EquippedItem = __instance.GetCurrentWeapon();
 
 				if (AutorunStrafe.Value)
 				{
@@ -226,11 +243,10 @@ namespace ValheimMovementMods
 				{
 					Crouching = !Crouching;
 				}
-
 				if (AutorunSet && backwardDown)
-                {
+				{
 					AutorunSet = false;
-                }
+				}
 			}
 		}
 	}
