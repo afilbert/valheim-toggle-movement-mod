@@ -71,6 +71,7 @@ Configuration allows:
 * **AutorunToggle**, Fixes auto-run to follow look, default: true
 * **AutorunFreelookKey**, Overrides look direction in auto-run while pressed, default: CapsLock
 * **AutorunStrafe**, Enable strafing while in auto-run/crouch, default: true
+* **ReequipWeaponAfterSwimming**, Any weapon stowed in order to swim will reequip once out of swimming state
 * **RunToCrouchToggle**, Go from run to crouch with the click of a button, default: true
 * **StopSneakOnNoStam**, Stops sneak movement if no stamina available, default: true
 * **MinStamRefillPercentValue**, Percentage to stop running/sneaking and let stamina refill, default: 20%
@@ -86,6 +87,7 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 0.0.6 Reequip weapon automatically upon exiting swim state if one stowed while swimming
 * 0.0.5 Strafe while auto-running/sneaking
 * 0.0.4 Unequip weapons while sprinting
 * 0.0.3 More QOL improvements. Bump build version number
