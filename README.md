@@ -17,7 +17,9 @@ Have you ever played so much Valheim that you injured yourself? Well, I did. Whe
 * Regain manual control of auto-run/sneak at any time by using directional input (or Back key/button if AutorunStrafe enabled)
 * Sprinting will temporarily and automatically pause while Arbalest is reloading
 * Auto-run sprinting will temporarily and automatically pause to allow equipping/switching weapons
-* Sprint will detoggle if health less than threshold (30% by default)
+* Sprint will detoggle automatically if health less than threshold (30% by default)
+* Sprint will detoggle automatically if stamina at zero for elapsed time (5 seconds by default)
+  *	This can happen if forward key/button is held, overriding other stamina safeguards
 * Weapons will auto-reequip on exiting swim state if stowed while swimming
 * Fully configurable
 
@@ -57,6 +59,12 @@ That's especially true if your health is so low that you can't run away or fight
 
 So v0.0.3 introduces a safety valve that toggles off Sprint if your health drops below a target threshold (30% by default).
 
+### Safeguard Stamina Regen on Zero Stamina
+
+Growths will mess you up! Spraying their tarry liquid death-punches just before leaping through the air tests even the best equipped and fed Viking adventurer. It's typically right around them tarring you and bounding to cut off your path that you run out of stamina completely. You're then left mashing your forward key in terror as you attempt to down whatever mead you can to help you escape. It's easy in those moments to forget that your sprint is toggled on, and holding the forward key to keep moving will keep your stamina at zero... indefinitely.
+
+So v0.0.7 introduces a configurable safety valve to detoggle sprint after an elapsed time (5 seconds by default) at zero stamina. This allows stamina to regenerate even if you are overriding stamina safeguards by holding down your Forward key/button.
+
 ### Auto-run Sprint Enable/Switch Weapons
 
 v0.0.3 introduced the ability to equip/switch weapons during auto-run while sprinting. Sometimes you know you're getting close to a battle, and want to arrive prepared. Stock Valheim won't let you equip/switch weapons while sprinting, but now you can!
@@ -79,6 +87,8 @@ Configuration allows:
 * **StopStamLimitOnManualInputToggle**, Stops the wait for 100% stam fill to resume sprinting on manual Forward input, default: true
 * **SafeguardStaminaOnLowHealthToggle**", Allow stamina to recover on low health by automatically detoggling sprint, default: true
 * **SprintHealthOverridePercentValue**, Percentage of health to detoggle sprint so stamina can start to recover, default: 30%
+* **TrackElapsedZeroStamToggle**, Automatically toggle off sprint after elapsed time spent at zero stamina, default: true
+* **TrackElapsedZeroStamTime**, Seconds to wait at zero stamina before toggling off sprint, default: 5 seconds
 
 Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
 
@@ -88,6 +98,7 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 0.0.7 Safeguard stamina regen after configurable elapsed time at zero stamina
 * 0.0.6 Reequip weapon automatically upon exiting swim state if one stowed while swimming
 * 0.0.5 Strafe while auto-running/sneaking
 * 0.0.4 Unequip weapons while sprinting
