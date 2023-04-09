@@ -14,7 +14,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "0.0.6";
+		const string pluginVersion = "0.0.7";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -34,10 +34,12 @@ namespace ValheimMovementMods
 		public static ConfigEntry<float> MinStamRefillPercent;
 		public static ConfigEntry<bool> SafeguardStaminaOnLowHealth;
 		public static ConfigEntry<float> SprintHealthOverride;
+		public static ConfigEntry<bool> TrackElapsedZeroStamToggle;
+		public static ConfigEntry<float> TrackElapsedZeroStamTime;
 
 		public static bool StaminaRefilling = false, SprintSet = false, AutorunSet = false;
 		public static bool RunToCrouch = false, Crouching = false;
-		public static float StamRefillThreshold = 0f, SprintHealthThreshold = 0f;
+		public static float ElapsedTimeAtZeroStam = 0f, StamRefillThreshold = 0f, SprintHealthThreshold = 0f;
 
 		public static ItemDrop.ItemData EquippedItem = null;
 		public static ItemDrop.ItemData ReequipItem = null;
@@ -60,6 +62,8 @@ namespace ValheimMovementMods
 			SafeguardStaminaOnLowHealth = Config.Bind<bool>("Stamina", "SafeguardStaminaOnLowHealthToggle", true, "Allow stamina to recover on low health by automatically detoggling sprint");
 			SprintHealthOverride = Config.Bind<float>("Stamina", "SprintHealthOverridePercentValue", 30f, "Percentage of health to detoggle sprint so stamina can start to recover");
 			SprintHealthThreshold = SprintHealthOverride.Value / 100f;
+			TrackElapsedZeroStamToggle = Config.Bind<bool>("Stamina", "TrackElapsedZeroStamToggle", true, "Automatically toggle off sprint after elapsed time spent at zero stamina");
+			TrackElapsedZeroStamTime = Config.Bind<float>("Stamina", "TrackElapsedZeroStamTime", 5f, "Seconds to wait at zero stamina before toggling off sprint");
 
 			_harmony.PatchAll();
 		}
@@ -182,6 +186,21 @@ namespace ValheimMovementMods
 					{
 						run = true;
 						crouch = false;
+					}
+				}
+				if (TrackElapsedZeroStamToggle.Value)
+				{
+					if (SprintSet && __instance.GetStaminaPercentage() == 0)
+					{
+						ElapsedTimeAtZeroStam += Time.deltaTime;
+					}
+					else
+					{
+						ElapsedTimeAtZeroStam = 0f;
+					}
+					if (SprintSet && ElapsedTimeAtZeroStam > TrackElapsedZeroStamTime.Value)
+					{
+						SprintSet = false;
 					}
 				}
 			}
