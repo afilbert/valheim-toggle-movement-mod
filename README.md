@@ -102,7 +102,9 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
-* 0.0.9 Allow for custom sprint toggle key to be assigned and used as an alternative to the Shift key (T by default)
+* 0.1.0 Fix bug that prevented alternative Run toggle key from instantiating correctly 
+  * Fix regression bug caused by removing Esc key binding
+* 0.0.9 Allow for custom sprint toggle key to be assigned and used as an alternative to the Run key (T by default)
   * Config AutorunStrafe feature to disable sprinting if Forward key/button pressed
   * Fixes bug that caused a 30% increase in speed while strafing in auto-run
   * Fixes bug that caused null exception after logging back out to the game start screen
