@@ -98,6 +98,7 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 0.0.8 Target latest BepInEx version 5.4.2105
 * 0.0.7 Safeguard stamina regen after configurable elapsed time at zero stamina
 * 0.0.6 Reequip weapon automatically upon exiting swim state if one stowed while swimming
 * 0.0.5 Strafe while auto-running/sneaking
