@@ -14,7 +14,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "0.0.9";
+		const string pluginVersion = "0.1.0";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -224,11 +224,10 @@ namespace ValheimMovementMods
 			{
 				KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), AutorunFreelookKey.Value);
 				__instance.AddButton("Caps", key);
-				if (SprintToggleAlternate.Value)
-				{
-					key = (KeyCode)Enum.Parse(typeof(KeyCode), SprintToggleAlternateKey.Value);
-					__instance.AddButton("Sprint", key);
-				}
+				key = (KeyCode)Enum.Parse(typeof(KeyCode), "Escape");
+				__instance.AddButton("Esc", key);
+				key = (KeyCode)Enum.Parse(typeof(KeyCode), SprintToggleAlternateKey.Value);
+				__instance.AddButton("Sprint", key);
 			}
 		}
 
@@ -258,7 +257,7 @@ namespace ValheimMovementMods
 				bool run;
 				if (SprintToggleAlternate.Value)
 				{
-					run = ZInput.GetButtonUp("Sprint") || ZInput.GetButtonUp(SprintToggleAlternateKey.Value);
+					run = ZInput.GetButtonUp("Sprint");
 				}
 				else
 				{
