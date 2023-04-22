@@ -7,6 +7,7 @@ Have you ever played so much Valheim that you injured yourself? Well, I did. Whe
 ## Features
 
 * Sprint (Run) functions as a toggle
+  * Can be overridden to alternatively use assigned key (default is T) to toggle on/off sprinting
 * Auto-sneak is now possible
 * Auto-run/sneak now follows look direction by default
   * Can be overridden to detach look direction when assigned key is held (default is CapsLock)
@@ -77,10 +78,13 @@ Configuration allows:
 
 * **Enable**, Enable the mod, default: true
 * **SprintToggle**, Sprint works like a toggle, default: true
+* **SprintToggleAlternate**, Sprint is toggled through use of another key/button, default: false
+* **SprintToggleAlternateKey**, Used in conjunction with SprintToggleAlternate. This is the key used to toggle sprint on/off, default: T
 * **AutorunToggle**, Fixes auto-run to follow look, default: true
 * **AutorunFreelookKey**, Overrides look direction in auto-run while pressed, default: CapsLock
 * **AutorunStrafe**, Enable strafing while in auto-run/crouch, default: true
-* **ReequipWeaponAfterSwimming**, Any weapon stowed in order to swim will reequip once out of swimming state
+* **AutorunStrafeForwardDisables**, Disable autorun if Forward key/button pressed while AutorunStrafe enabled, default: true
+* **ReequipWeaponAfterSwimming**, Any weapon stowed in order to swim will reequip once out of swimming state, default: true
 * **RunToCrouchToggle**, Go from run to crouch with the click of a button, default: true
 * **StopSneakOnNoStam**, Stops sneak movement if no stamina available, default: true
 * **MinStamRefillPercentValue**, Percentage to stop running/sneaking and let stamina refill, default: 20%
@@ -98,6 +102,10 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 0.0.9 Allow for custom sprint toggle key to be assigned and used as an alternative to the Shift key (T by default)
+  * Config AutorunStrafe feature to disable sprinting if Forward key/button pressed
+  * Fixes bug that caused a 30% increase in speed while strafing in auto-run
+  * Fixes bug that caused null exception after logging back out to the game start screen
 * 0.0.8 Target latest BepInEx version 5.4.2105
 * 0.0.7 Safeguard stamina regen after configurable elapsed time at zero stamina
 * 0.0.6 Reequip weapon automatically upon exiting swim state if one stowed while swimming
