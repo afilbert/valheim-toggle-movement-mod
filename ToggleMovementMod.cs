@@ -14,7 +14,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "0.1.0";
+		const string pluginVersion = "0.1.1";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -98,13 +98,13 @@ namespace ValheimMovementMods
 
 				bool directionalDown = false;
 
-				if (ReequipWeaponAfterSwimming.Value && EquippedItem != null && EquippedItem.m_shared.m_name != "Unarmed" && __instance.InLiquidSwimDepth())
+				if (ReequipWeaponAfterSwimming.Value && EquippedItem != null && EquippedItem.m_shared.m_name != "Unarmed" && __instance.IsSwimming())
 				{
 					ReequipItem = EquippedItem;
 				}
 				else
 				{
-					if (ReequipWeaponAfterSwimming.Value && ReequipItem != null && !__instance.InLiquidSwimDepth())
+					if (ReequipWeaponAfterSwimming.Value && ReequipItem != null && !__instance.IsSwimming())
 					{
 						__instance.EquipItem(ReequipItem);
 						ReequipItem = null;
