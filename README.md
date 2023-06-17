@@ -102,6 +102,7 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 0.1.1 Fix bug that locked character movement after game patch 0.216.9
 * 0.1.0 Fix bug that prevented alternative Run toggle key from instantiating correctly 
   * Fix regression bug caused by removing Esc key binding
 * 0.0.9 Allow for custom sprint toggle key to be assigned and used as an alternative to the Run key (T by default)
