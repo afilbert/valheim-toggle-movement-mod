@@ -14,7 +14,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "0.1.1";
+		const string pluginVersion = "0.1.2";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -123,8 +123,11 @@ namespace ValheimMovementMods
 				}
 
 				bool isWeaponLoaded = true;
-				autoRun = false;
-				___m_autoRun = false;
+				if (AutorunOverride.Value)
+                {
+					autoRun = false;
+					___m_autoRun = false;
+				}
 
 				bool equipmentAnimating = ___m_actionAnimation != null;
 
