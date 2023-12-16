@@ -70,9 +70,7 @@ So v0.0.7 introduces a configurable safety valve to detoggle sprint after an ela
 
 v0.0.3 introduced the ability to equip/switch weapons during auto-run while sprinting. Sometimes you know you're getting close to a battle, and want to arrive prepared. Stock Valheim won't let you equip/switch weapons while sprinting, but now you can!
 
-## Config
-
-The [Official BepInEx ConfigurationManager](https://github.com/BepInEx/BepInEx.ConfigurationManager) is a required dependency.
+### Config
 
 Configuration allows:
 
@@ -102,6 +100,8 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 0.1.3 Fix nil bomb caused by patch 0.217.38. Fixes broken menu translations when loading the game
+  * Drop requirement for [Official BepInEx ConfigurationManager](https://valheim.thunderstore.io/package/Azumatt/Official_BepInEx_ConfigurationManager/) from Thunderstore manifest.json to allow flexibility
 * 0.1.2 Fix bug that disabled vanilla autorun when AutorunToggle was disabled in config
 * 0.1.1 Fix bug that locked character movement after game patch 0.216.9
 * 0.1.0 Fix bug that prevented alternative Run toggle key from instantiating correctly 

@@ -5,6 +5,7 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace ValheimMovementMods
 {
@@ -14,7 +15,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "0.1.2";
+		const string pluginVersion = "0.1.3";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -79,7 +80,11 @@ namespace ValheimMovementMods
 		{
 			private static void Prefix(ref Player __instance, ref Vector3 movedir, ref bool run, ref bool autoRun, ref bool crouch, ref Vector3 ___m_lookDir, ref Vector3 ___m_moveDir, ref bool ___m_autoRun, ref bool ___m_crouchToggled, ref string ___m_actionAnimation, ref List<Player.MinorActionData> ___m_actionQueue)
 			{
-				if (!__instance || _plugin.IsInMenu() || !EnableToggle.Value)
+				if (!EnableToggle.Value)
+				{
+					return;
+				}
+				if (!__instance || _plugin.IsInMenu())
 				{
 					autoRun = false;
 					___m_autoRun = false;
@@ -189,7 +194,7 @@ namespace ValheimMovementMods
 						autoRun = false;
 						___m_autoRun = false;
 					}
-				} 
+				}
 				else
 				{
 					if (__instance.GetHealthPercentage() < SprintHealthThreshold && SafeguardStaminaOnLowHealth.Value)
@@ -225,11 +230,11 @@ namespace ValheimMovementMods
 		{
 			private static void Postfix(ZInput __instance)
 			{
-				KeyCode key = (KeyCode)Enum.Parse(typeof(KeyCode), AutorunFreelookKey.Value);
+				Key key = (Key)Enum.Parse(typeof(Key), AutorunFreelookKey.Value);
 				__instance.AddButton("Caps", key);
-				key = (KeyCode)Enum.Parse(typeof(KeyCode), "Escape");
+				key = (Key)Enum.Parse(typeof(Key), "Escape");
 				__instance.AddButton("Esc", key);
-				key = (KeyCode)Enum.Parse(typeof(KeyCode), SprintToggleAlternateKey.Value);
+				key = (Key)Enum.Parse(typeof(Key), SprintToggleAlternateKey.Value);
 				__instance.AddButton("Sprint", key);
 			}
 		}
@@ -257,12 +262,12 @@ namespace ValheimMovementMods
 		{
 			if (Started && EnableToggle.Value && !IsInMenu())
 			{
-				bool run;
+				bool run = false;
 				if (SprintToggleAlternate.Value)
 				{
 					run = ZInput.GetButtonUp("Sprint");
 				}
-				else
+				else if (SprintToggle.Value)
 				{
 					run = ZInput.GetButtonUp("Run") || ZInput.GetButtonUp("JoyRun");
 				}
