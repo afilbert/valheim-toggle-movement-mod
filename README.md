@@ -75,6 +75,7 @@ v0.0.3 introduced the ability to equip/switch weapons during auto-run while spri
 Configuration allows:
 
 * **Enable**, Enable the mod, default: true
+* **OverrideGameAutorun**, This overrides the new auto-run config setting that functions as a sprint toggle, default: true
 * **SprintToggle**, Sprint works like a toggle, default: true
 * **SprintToggleAlternate**, Sprint is toggled through use of another key/button, default: false
 * **SprintToggleAlternateKey**, Used in conjunction with SprintToggleAlternate. This is the key used to toggle sprint on/off, default: T
@@ -82,6 +83,7 @@ Configuration allows:
 * **AutorunFreelookKey**, Overrides look direction in auto-run while pressed, default: CapsLock
 * **AutorunStrafe**, Enable strafing while in auto-run/crouch, default: true
 * **AutorunStrafeForwardDisables**, Disable autorun if Forward key/button pressed while AutorunStrafe enabled, default: true
+* **AutorunInMap**, Keep running while viewing map, default: true
 * **ReequipWeaponAfterSwimming**, Any weapon stowed in order to swim will reequip once out of swimming state, default: true
 * **RunToCrouchToggle**, Go from run to crouch with the click of a button, default: true
 * **StopSneakOnNoStam**, Stops sneak movement if no stamina available, default: true
@@ -91,6 +93,7 @@ Configuration allows:
 * **SprintHealthOverridePercentValue**, Percentage of health to detoggle sprint so stamina can start to recover, default: 30%
 * **TrackElapsedZeroStamToggle**, Automatically toggle off sprint after elapsed time spent at zero stamina, default: true
 * **TrackElapsedZeroStamTime**, Seconds to wait at zero stamina before toggling off sprint, default: 5 seconds
+* **ChangeStamColorOnSprint**, Changes stamina bar color to orange when draining and sprint enabled, and blue when stam regenerating. Flashes empty bar if stam drained fully while sprinting, default: true
 
 Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
 
@@ -100,6 +103,13 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 1.0.0 Major version release adds color-coded stamina bar
+  * Stamina bar will be orange when sprint toggled, else it will appear blue when regenerating, else it will be its normal yellow
+  * Stamina bar will repeatedly flash while empty if sprint toggled and regen is overridden by directional input
+  * Detoggling sprint while stamina is regenerating will cause stam regen to cancel as well. Stam regen otherwise reenables below the threshold as expected. This comes in handy while fighting without Rested buff, or with debuffs like Cold and Wet
+  * Fixes bug that caused stam regen loop when holding directional keys while regenerating at stam regen threshold. The bug caused the character to stutter step
+* 0.1.4 Add config to override in-game auto-run toggle setting. This allows mod settings and behavior (like sneak to run) to work again
+  * Adds new config that allows character to keep auto-running while in map
 * 0.1.3 Fix nil bomb caused by patch 0.217.38. Fixes broken menu translations when loading the game
   * Drop requirement for [Official BepInEx ConfigurationManager](https://valheim.thunderstore.io/package/Azumatt/Official_BepInEx_ConfigurationManager/) from Thunderstore manifest.json to allow flexibility
 * 0.1.2 Fix bug that disabled vanilla autorun when AutorunToggle was disabled in config
