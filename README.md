@@ -77,6 +77,7 @@ Configuration allows:
 * **Enable**, Enable the mod, default: true
 * **OverrideGameAutorun**, This overrides the new auto-run config setting that functions as a sprint toggle, default: true
 * **SprintToggle**, Sprint works like a toggle, default: true
+* **OnlyToggleWhenAutorunning**, Sprint only works like a toggle when auto-running, default: false
 * **SprintToggleAlternate**, Sprint is toggled through use of another key/button, default: false
 * **SprintToggleAlternateKey**, Used in conjunction with SprintToggleAlternate. This is the key used to toggle sprint on/off, default: T
 * **AutorunToggle**, Fixes auto-run to follow look, default: true
@@ -84,6 +85,7 @@ Configuration allows:
 * **AutorunStrafe**, Enable strafing while in auto-run/crouch, default: true
 * **AutorunStrafeForwardDisables**, Disable autorun if Forward key/button pressed while AutorunStrafe enabled, default: true
 * **AutorunInMap**, Keep running while viewing map, default: true
+* **AutorunInInventory**, Keep running while viewing inventory, default: false
 * **ReequipWeaponAfterSwimming**, Any weapon stowed in order to swim will reequip once out of swimming state, default: true
 * **RunToCrouchToggle**, Go from run to crouch with the click of a button, default: true
 * **StopSneakOnNoStam**, Stops sneak movement if no stamina available, default: true
@@ -103,6 +105,7 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 1.1.0 Add config to only toggle sprinting when auto-running, and/or allow auto-running while in inventory
 * 1.0.0 Major version release adds color-coded stamina bar
   * Stamina bar will be orange when sprint toggled, else it will appear blue when regenerating, else it will be its normal yellow
   * Stamina bar will repeatedly flash while empty if sprint toggled and regen is overridden by directional input
