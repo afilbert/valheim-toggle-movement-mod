@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 using TMPro;
 
 namespace ValheimMovementMods
@@ -17,7 +16,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "1.0.0";
+		const string pluginVersion = "1.1.0";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -42,9 +41,11 @@ namespace ValheimMovementMods
 		public static ConfigEntry<float> SprintHealthOverride;
 		public static ConfigEntry<bool> TrackElapsedZeroStamToggle;
 		public static ConfigEntry<float> TrackElapsedZeroStamTime;
-		public static ConfigEntry<bool> OverrideAutoRunSetting;
-		public static ConfigEntry<bool> AllowAutoRunWhileInMap;
+		public static ConfigEntry<bool> OverrideAutorunSetting;
+		public static ConfigEntry<bool> AllowAutorunWhileInMap;
 		public static ConfigEntry<bool> VisuallyIndicateSprintState;
+		public static ConfigEntry<bool> SprintToggleOnAutorun;
+		public static ConfigEntry<bool> AllowAutorunInInventory;
 
 		public static bool StaminaRefilling = false, SprintSet = false, AutorunSet = false;
 		public static bool RunToCrouch = false, Crouching = false;
@@ -58,15 +59,17 @@ namespace ValheimMovementMods
 			_plugin = this;
 			logger = Logger;
 			EnableToggle = Config.Bind<bool>("Mod Config", "Enable", true, "Enable this mod");
-			OverrideAutoRunSetting = Config.Bind<bool>("Mod Config", "OverrideGameAutorun", true, "This overrides the new auto-run config setting that functions as a sprint toggle");
+			OverrideAutorunSetting = Config.Bind<bool>("Mod Config", "OverrideGameAutorun", true, "This overrides the new auto-run config setting that functions as a sprint toggle");
 			SprintToggle = Config.Bind<bool>("Sprint", "SprintToggle", true, "Sprint works like a toggle when true");
+			SprintToggleOnAutorun = Config.Bind<bool>("Sprint", "OnlyToggleWhenAutorunning", false, "Sprint only works like a toggle when auto-running");
 			SprintToggleAlternate = Config.Bind<bool>("SprintAlternate", "SprintToggleAlternate", false, "Sprint is toggled through use of another key/button");
 			SprintToggleAlternateKey = Config.Bind<string>("SprintAlternate", "SprintToggleAlternateKey", "T", "Used in conjunction with SprintToggleAlternate. This is the key used to toggle sprint on/off");
 			AutorunOverride = Config.Bind<bool>("Auto-run", "AutorunToggle", true, "Fixes auto-run to follow look direction");
 			AutorunFreelookKey = Config.Bind<string>("Auto-run", "AutorunFreelookKey", "CapsLock", "Overrides look direction in auto-run while pressed");
 			AutorunStrafe = Config.Bind<bool>("Auto-run", "AutorunStrafe", true, "Enable strafing while in auto-run/crouch");
 			AutorunStrafeForwardDisables = Config.Bind<bool>("Auto-run", "AutorunStrafeForwardDisables", false, "Disable autorun if Forward key/button pressed while AutorunStrafe enabled");
-			AllowAutoRunWhileInMap = Config.Bind<bool>("Auto-run", "AutorunInMap", true, "Keep running while viewing map");
+			AllowAutorunWhileInMap = Config.Bind<bool>("Auto-run", "AutorunInMap", true, "Keep running while viewing map");
+			AllowAutorunInInventory = Config.Bind<bool>("Auto-run", "AutorunInInventory", false, "Keep running while viewing inventory");
 			ReequipWeaponAfterSwimming = Config.Bind<bool>("Swim", "ReequipWeaponAfterSwimming", true, "Any weapon stowed in order to swim will reequip once out of swimming state");
 			RunToCrouchToggle = Config.Bind<bool>("Auto-sneak", "RunToCrouchToggle", true, "Allows going from full run to crouch with a click of the crouch button (and vice versa)");
 			StopSneakMovementToggle = Config.Bind<bool>("Auto-sneak", "StopSneakOnNoStam", true, "Stops sneak movement if no stamina available. Stock behavior is to pop out of sneak into walk");
@@ -107,7 +110,7 @@ namespace ValheimMovementMods
 					StaminaRefilling = false;
 				}
 
-				if (OverrideAutoRunSetting.Value)
+				if (OverrideAutorunSetting.Value)
 				{
 					run = ZInput.GetButton("Run") || ZInput.GetButton("JoyRun");
 				}
@@ -294,7 +297,7 @@ namespace ValheimMovementMods
 
 		private bool IsInMenu()
 		{
-			return ZInput.GetButtonDown("Esc") || ZInput.GetButtonDown("JoyMenu") || InventoryGui.IsVisible() || (!AllowAutoRunWhileInMap.Value && Minimap.IsOpen()) || Console.IsVisible() || TextInput.IsVisible() || ZNet.instance.InPasswordDialog() || StoreGui.IsVisible() || Hud.IsPieceSelectionVisible() || UnifiedPopup.IsVisible();
+			return ZInput.GetButtonDown("Esc") || ZInput.GetButtonDown("JoyMenu") || (!AllowAutorunInInventory.Value && InventoryGui.IsVisible()) || (!AllowAutorunWhileInMap.Value && Minimap.IsOpen()) || Console.IsVisible() || TextInput.IsVisible() || ZNet.instance.InPasswordDialog() || StoreGui.IsVisible() || Hud.IsPieceSelectionVisible() || UnifiedPopup.IsVisible();
 		}
 
 		private void Update()
@@ -332,9 +335,20 @@ namespace ValheimMovementMods
 				{
 					AutorunSet = !AutorunSet;
 				}
+				if (!AutorunSet && SprintToggleOnAutorun.Value)
+				{
+					SprintSet = false;
+				}
 				if (run && SprintToggle.Value)
 				{
-					SprintSet = !SprintSet;
+					if (!SprintToggleOnAutorun.Value)
+					{
+						SprintSet = !SprintSet;
+					}
+					if (SprintToggleOnAutorun.Value && AutorunSet)
+					{
+						SprintSet = !SprintSet;
+					}
 				}
 				if (crouch && RunToCrouchToggle.Value)
 				{
