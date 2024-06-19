@@ -1,6 +1,6 @@
 # Valheim - Toggle Movement Mod (ToMoMo)
 
-**_Works with Mistlands Update!_**
+**_Works with Asshlands Update!_**
 
 Have you ever played so much Valheim that you injured yourself? Well, I did. When Mistlands released, I bounded over the new and difficult terrain for so many hours mashing my `Shift` key that I experienced what I can only describe as "Valheim pinkie." Basically, I suffered an RSI that forced me to take a break. That's when I knew I needed to make this mod!
 
@@ -96,6 +96,8 @@ Configuration allows:
 * **TrackElapsedZeroStamToggle**, Automatically toggle off sprint after elapsed time spent at zero stamina, default: true
 * **TrackElapsedZeroStamTime**, Seconds to wait at zero stamina before toggling off sprint, default: 5 seconds
 * **ChangeStamColorOnSprint**, Changes stamina bar color to orange when draining and sprint enabled, and blue when stam regenerating. Flashes empty bar if stam drained fully while sprinting, default: true
+* **DetoggleSprintAtLowStamWhenAttacking**, Detoggles sprint if attacking at low stamina, default: true
+* **DetoggleSprintAtLowStamWhenAttackingThreshold**, Threshold at which stamina will detoggle sprint if also attacking, default: 0.04f
 
 Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim/)
 
@@ -105,6 +107,8 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 1.2.0 Detoggle auto-run by default if at low stam when attacking, with configurable stam threshold
+	* Ashlands combat proves challenging with mod enabled without this config option, as stamina gets pinned to zero indefinitely while attacking hordes of mobs
 * 1.1.0 Add config to only toggle sprinting when auto-running, and/or allow auto-running while in inventory
 * 1.0.0 Major version release adds color-coded stamina bar
   * Stamina bar will be orange when sprint toggled, else it will appear blue when regenerating, else it will be its normal yellow

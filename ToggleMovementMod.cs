@@ -16,7 +16,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "1.1.0";
+		const string pluginVersion = "1.2.0";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -46,6 +46,8 @@ namespace ValheimMovementMods
 		public static ConfigEntry<bool> VisuallyIndicateSprintState;
 		public static ConfigEntry<bool> SprintToggleOnAutorun;
 		public static ConfigEntry<bool> AllowAutorunInInventory;
+		public static ConfigEntry<bool> DetoggleSprintAtLowStamWhenAttacking;
+		public static ConfigEntry<float> DetoggleSprintAtLowStamWhenAttackingThreshold;
 
 		public static bool StaminaRefilling = false, SprintSet = false, AutorunSet = false;
 		public static bool RunToCrouch = false, Crouching = false;
@@ -82,6 +84,8 @@ namespace ValheimMovementMods
 			TrackElapsedZeroStamToggle = Config.Bind<bool>("Stamina", "TrackElapsedZeroStamToggle", true, "Automatically toggle off sprint after elapsed time spent at zero stamina");
 			TrackElapsedZeroStamTime = Config.Bind<float>("Stamina", "TrackElapsedZeroStamTime", 5f, "Seconds to wait at zero stamina before toggling off sprint");
 			VisuallyIndicateSprintState = Config.Bind<bool>("Stamina", "ChangeStamColorOnSprint", true, "Changes stamina bar color to orange when draining and sprint enabled, and blue when stam regenerating. Flashes empty bar if stam drained fully while sprinting");
+			DetoggleSprintAtLowStamWhenAttacking = Config.Bind<bool>("Stamina", "DetoggleSprintAtLowStamWhenAttacking", true, "Detoggles sprint if attacking at low stamina");
+			DetoggleSprintAtLowStamWhenAttackingThreshold = Config.Bind<float>("Stamina", "DetoggleSprintAtLowStamWhenAttackingThreshold", 0.04f, "Threshold at which stamina will detoggle sprint if also attacking");
 
 			_harmony.PatchAll();
 		}
@@ -119,6 +123,8 @@ namespace ValheimMovementMods
 				bool backwardDown = ZInput.GetButton("Backward") || ZInput.GetButton("JoyBackward");
 				bool leftDown = ZInput.GetButton("Left") || ZInput.GetButton("JoyLeft");
 				bool rightDown = ZInput.GetButton("Right") || ZInput.GetButton("JoyRight");
+
+				bool attackDown = ZInput.GetButton("Attack") || ZInput.GetButton("JoyAttack");
 
 				bool directionalDown = false;
 
@@ -239,6 +245,10 @@ namespace ValheimMovementMods
 						SprintSet = false;
 					}
 				}
+				if (DetoggleSprintAtLowStamWhenAttacking.Value && SprintSet && __instance.GetStaminaPercentage() <= DetoggleSprintAtLowStamWhenAttackingThreshold.Value && attackDown)
+                {
+					SprintSet = false;
+                }
 			}
 		}
 
