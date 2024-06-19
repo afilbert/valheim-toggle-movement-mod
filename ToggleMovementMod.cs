@@ -16,11 +16,15 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "1.2.0";
+		const string pluginVersion = "1.3.0";
+		const string freeLookKey = "FreeLook";
+		const string sprintKey = "Sprint";
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
 		public static ToggleMovementMod _plugin;
+		public static ZInput _inputInstance;
+		public static Dictionary<string, ZInput.ButtonDef> _buttonsDict;
 
 		public static bool Started = false;
 
@@ -48,6 +52,8 @@ namespace ValheimMovementMods
 		public static ConfigEntry<bool> AllowAutorunInInventory;
 		public static ConfigEntry<bool> DetoggleSprintAtLowStamWhenAttacking;
 		public static ConfigEntry<float> DetoggleSprintAtLowStamWhenAttackingThreshold;
+		public static string InitialSprintToggleAlternateKey;
+		public static string InitialAutorunFreelookKey;
 
 		public static bool StaminaRefilling = false, SprintSet = false, AutorunSet = false;
 		public static bool RunToCrouch = false, Crouching = false;
@@ -87,6 +93,9 @@ namespace ValheimMovementMods
 			DetoggleSprintAtLowStamWhenAttacking = Config.Bind<bool>("Stamina", "DetoggleSprintAtLowStamWhenAttacking", true, "Detoggles sprint if attacking at low stamina");
 			DetoggleSprintAtLowStamWhenAttackingThreshold = Config.Bind<float>("Stamina", "DetoggleSprintAtLowStamWhenAttackingThreshold", 0.04f, "Threshold at which stamina will detoggle sprint if also attacking");
 
+			InitialSprintToggleAlternateKey = SprintToggleAlternateKey.Value;
+			InitialAutorunFreelookKey = AutorunFreelookKey.Value;
+
 			_harmony.PatchAll();
 		}
 
@@ -113,6 +122,8 @@ namespace ValheimMovementMods
 				{
 					StaminaRefilling = false;
 				}
+
+				_plugin.MaybeUpdateConfigurableInput();
 
 				if (OverrideAutorunSetting.Value)
 				{
@@ -180,7 +191,7 @@ namespace ValheimMovementMods
 				{
 					___m_autoRun = true;
 				}
-				if (___m_autoRun && (AutorunOverride.Value && !ZInput.GetButton("Caps")))
+				if (___m_autoRun && (AutorunOverride.Value && !ZInput.GetButton(freeLookKey)))
 				{
 					if (AutorunStrafe.Value)
 					{
@@ -252,18 +263,42 @@ namespace ValheimMovementMods
 			}
 		}
 
-		[HarmonyPatch(typeof(ZInput), "Reset")]
-		private class ZInput_PatchReset
+		[HarmonyPatch(typeof(ZInput), "Load")]
+		private class ZInput_PatchLoad
 		{
-			private static void Postfix(ZInput __instance)
+			private static void Postfix(ZInput __instance, Dictionary<string, ZInput.ButtonDef> ___m_buttons)
 			{
-				Key key = (Key)Enum.Parse(typeof(Key), AutorunFreelookKey.Value);
-				__instance.AddButton("Caps", key);
-				key = (Key)Enum.Parse(typeof(Key), "Escape");
-				__instance.AddButton("Esc", key);
-				key = (Key)Enum.Parse(typeof(Key), SprintToggleAlternateKey.Value);
-				__instance.AddButton("Sprint", key);
+				_inputInstance = __instance;
+				_buttonsDict = ___m_buttons;
+				Key key = (Key)Enum.Parse(typeof(Key), "Escape");
+				_inputInstance.AddButton("Esc", key);
+				_plugin.UpdateBindings();
 			}
+		}
+
+		private void MaybeUpdateConfigurableInput()
+        {
+			if (InitialSprintToggleAlternateKey != SprintToggleAlternateKey.Value || InitialAutorunFreelookKey != AutorunFreelookKey.Value)
+            {
+				try
+				{
+					_buttonsDict.Remove(sprintKey);
+					_buttonsDict.Remove(freeLookKey);
+					InitialSprintToggleAlternateKey = SprintToggleAlternateKey.Value;
+					InitialAutorunFreelookKey = AutorunFreelookKey.Value;
+					UpdateBindings();
+				}
+				catch (ArgumentException e) { }
+			}
+		}
+
+		private void UpdateBindings()
+        {
+			Key key = (Key)Enum.Parse(typeof(Key), AutorunFreelookKey.Value);
+			_inputInstance.AddButton(freeLookKey, key);
+			key = (Key)Enum.Parse(typeof(Key), SprintToggleAlternateKey.Value);
+			_inputInstance.AddButton(sprintKey, key);
+			logger.LogInfo($"Bindings - Free look: {AutorunFreelookKey.Value}. Toggle alternate: {SprintToggleAlternateKey.Value}");
 		}
 
 		[HarmonyPatch(typeof(Game), "Logout")]
