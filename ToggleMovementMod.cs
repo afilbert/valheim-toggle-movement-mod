@@ -19,6 +19,7 @@ namespace ValheimMovementMods
 		const string pluginVersion = "1.3.0";
 		const string freeLookKey = "FreeLook";
 		const string sprintKey = "Sprint";
+
 		public static ManualLogSource logger;
 
 		private readonly Harmony _harmony = new Harmony(pluginGUID);
@@ -37,6 +38,8 @@ namespace ValheimMovementMods
 		public static ConfigEntry<string> AutorunFreelookKey;
 		public static ConfigEntry<bool> AutorunStrafe;
 		public static ConfigEntry<bool> AutorunStrafeForwardDisables;
+		public static ConfigEntry<bool> AutorunDisableOnInput;
+		public static ConfigEntry<bool> AutorunDisableOnNoStam;
 		public static ConfigEntry<bool> ReequipWeaponAfterSwimming;
 		public static ConfigEntry<bool> RunToCrouchToggle;
 		public static ConfigEntry<bool> StopSneakMovementToggle;
@@ -52,6 +55,8 @@ namespace ValheimMovementMods
 		public static ConfigEntry<bool> AllowAutorunInInventory;
 		public static ConfigEntry<bool> DetoggleSprintAtLowStamWhenAttacking;
 		public static ConfigEntry<float> DetoggleSprintAtLowStamWhenAttackingThreshold;
+
+
 		public static string InitialSprintToggleAlternateKey;
 		public static string InitialAutorunFreelookKey;
 
@@ -76,6 +81,8 @@ namespace ValheimMovementMods
 			AutorunFreelookKey = Config.Bind<string>("Auto-run", "AutorunFreelookKey", "CapsLock", "Overrides look direction in auto-run while pressed");
 			AutorunStrafe = Config.Bind<bool>("Auto-run", "AutorunStrafe", true, "Enable strafing while in auto-run/crouch");
 			AutorunStrafeForwardDisables = Config.Bind<bool>("Auto-run", "AutorunStrafeForwardDisables", false, "Disable autorun if Forward key/button pressed while AutorunStrafe enabled");
+			AutorunDisableOnInput = Config.Bind<bool>("Auto-run", "AutorunDisableOnInput", false, "Disable autorun if directional key/button pressed while AutorunStrafe enabled");
+			AutorunDisableOnNoStam = Config.Bind<bool>("Auto-run", "AutorunDisableOnNoStam", false, "Disable autorun if zero stamina reached while AutorunStrafe enabled");
 			AllowAutorunWhileInMap = Config.Bind<bool>("Auto-run", "AutorunInMap", true, "Keep running while viewing map");
 			AllowAutorunInInventory = Config.Bind<bool>("Auto-run", "AutorunInInventory", false, "Keep running while viewing inventory");
 			ReequipWeaponAfterSwimming = Config.Bind<bool>("Swim", "ReequipWeaponAfterSwimming", true, "Any weapon stowed in order to swim will reequip once out of swimming state");
@@ -154,13 +161,16 @@ namespace ValheimMovementMods
 
 				EquippedItem = __instance.GetCurrentWeapon();
 
-				if (AutorunStrafe.Value)
+				if (!_plugin.IsInChat())
 				{
-					directionalDown = backwardDown || (AutorunStrafeForwardDisables.Value && forwardDown);
-				}
-				else
-				{
-					directionalDown = forwardDown || backwardDown || leftDown || rightDown;
+					if (AutorunStrafe.Value && !AutorunDisableOnInput.Value)
+					{
+						directionalDown = backwardDown || (AutorunStrafeForwardDisables.Value && forwardDown);
+					}
+					else
+					{
+						directionalDown = (!AutorunStrafe.Value || AutorunDisableOnInput.Value) && (forwardDown || backwardDown || leftDown || rightDown);
+					}
 				}
 
 				bool isWeaponLoaded = true;
@@ -175,11 +185,11 @@ namespace ValheimMovementMods
 				{
 					equipmentAnimating = true;
 				}
-				if (AutorunSet && AutorunOverride.Value && (directionalDown))
+				if ((AutorunSet && AutorunOverride.Value && directionalDown) || (AutorunDisableOnNoStam.Value && __instance.GetStaminaPercentage() == 0))
 				{
 					AutorunSet = false;
 				}
-				if (DisableStamLimitOnManualCntrl.Value && (directionalDown) && StaminaRefilling)
+				if (DisableStamLimitOnManualCntrl.Value && directionalDown && StaminaRefilling)
 				{
 					StaminaRefilling = false;
 				}
@@ -280,25 +290,35 @@ namespace ValheimMovementMods
         {
 			if (InitialSprintToggleAlternateKey != SprintToggleAlternateKey.Value || InitialAutorunFreelookKey != AutorunFreelookKey.Value)
             {
-				try
+				_buttonsDict.Remove(sprintKey);
+				_buttonsDict.Remove(freeLookKey);
+				if (UpdateBindings())
 				{
-					_buttonsDict.Remove(sprintKey);
-					_buttonsDict.Remove(freeLookKey);
+					// Only update the "initial" state if bindings are successful
 					InitialSprintToggleAlternateKey = SprintToggleAlternateKey.Value;
 					InitialAutorunFreelookKey = AutorunFreelookKey.Value;
-					UpdateBindings();
 				}
-				catch (ArgumentException e) { }
 			}
 		}
 
-		private void UpdateBindings()
+		private bool UpdateBindings()
         {
-			Key key = (Key)Enum.Parse(typeof(Key), AutorunFreelookKey.Value);
-			_inputInstance.AddButton(freeLookKey, key);
-			key = (Key)Enum.Parse(typeof(Key), SprintToggleAlternateKey.Value);
-			_inputInstance.AddButton(sprintKey, key);
-			logger.LogInfo($"Bindings - Free look: {AutorunFreelookKey.Value}. Toggle alternate: {SprintToggleAlternateKey.Value}");
+			try
+			{
+				Key key = (Key)Enum.Parse(typeof(Key), AutorunFreelookKey.Value);
+				_inputInstance.AddButton(freeLookKey, key);
+				key = (Key)Enum.Parse(typeof(Key), SprintToggleAlternateKey.Value);
+				_inputInstance.AddButton(sprintKey, key);
+				logger.LogInfo($"Bindings - Free look: {AutorunFreelookKey.Value}. Toggle alternate: {SprintToggleAlternateKey.Value}");
+
+				return true;
+			}
+			catch (ArgumentException e)
+			{
+				logger.LogError($"Error binding input buttons: {e.Message}");
+
+				return false;
+			}
 		}
 
 		[HarmonyPatch(typeof(Game), "Logout")]
@@ -342,12 +362,18 @@ namespace ValheimMovementMods
 
 		private bool IsInMenu()
 		{
-			return ZInput.GetButtonDown("Esc") || ZInput.GetButtonDown("JoyMenu") || (!AllowAutorunInInventory.Value && InventoryGui.IsVisible()) || (!AllowAutorunWhileInMap.Value && Minimap.IsOpen()) || Console.IsVisible() || TextInput.IsVisible() || ZNet.instance.InPasswordDialog() || StoreGui.IsVisible() || Hud.IsPieceSelectionVisible() || UnifiedPopup.IsVisible();
+			return ZInput.GetButtonDown("Esc") || ZInput.GetButtonDown("JoyMenu") || (!AllowAutorunInInventory.Value && InventoryGui.IsVisible()) || (!AllowAutorunWhileInMap.Value && Minimap.IsOpen()) || Console.IsVisible() || TextInput.IsVisible() || ZNet.instance.InPasswordDialog() || StoreGui.IsVisible() || Hud.IsPieceSelectionVisible() || UnifiedPopup.IsVisible() || GameCamera.InFreeFly() || PlayerCustomizaton.IsBarberGuiVisible();
+		}
+
+		private bool IsInChat()
+        {
+			return Chat.instance && Chat.instance.HasFocus();
+
 		}
 
 		private void Update()
 		{
-			if (Started && EnableToggle.Value && !IsInMenu())
+			if (Started && EnableToggle.Value && !IsInMenu() && !IsInChat())
 			{
 				bool run = false;
 				if (SprintToggleAlternate.Value)
