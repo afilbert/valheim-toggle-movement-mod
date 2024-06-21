@@ -115,7 +115,7 @@ namespace ValheimMovementMods
 				{
 					return;
 				}
-				if (!__instance || _plugin.IsInMenu())
+				if (!__instance || _plugin.IsInMenu() || (!AllowAutorunInInventory.Value && _plugin.IsInInventory()))
 				{
 					___m_autoRun = false;
 					AutorunSet = false;
@@ -132,7 +132,7 @@ namespace ValheimMovementMods
 
 				_plugin.MaybeUpdateConfigurableInput();
 
-				if (OverrideAutorunSetting.Value)
+				if (OverrideAutorunSetting.Value && !_plugin.IsInChat() && !_plugin.IsInInventory())
 				{
 					run = ZInput.GetButton("Run") || ZInput.GetButton("JoyRun");
 				}
@@ -161,7 +161,7 @@ namespace ValheimMovementMods
 
 				EquippedItem = __instance.GetCurrentWeapon();
 
-				if (!_plugin.IsInChat())
+				if (!_plugin.IsInChat() && !_plugin.IsInInventory())
 				{
 					if (AutorunStrafe.Value && !AutorunDisableOnInput.Value)
 					{
@@ -267,9 +267,9 @@ namespace ValheimMovementMods
 					}
 				}
 				if (DetoggleSprintAtLowStamWhenAttacking.Value && SprintSet && __instance.GetStaminaPercentage() <= DetoggleSprintAtLowStamWhenAttackingThreshold.Value && attackDown)
-                {
+				{
 					SprintSet = false;
-                }
+				}
 			}
 		}
 
@@ -287,9 +287,9 @@ namespace ValheimMovementMods
 		}
 
 		private void MaybeUpdateConfigurableInput()
-        {
+		{
 			if (InitialSprintToggleAlternateKey != SprintToggleAlternateKey.Value || InitialAutorunFreelookKey != AutorunFreelookKey.Value)
-            {
+			{
 				_buttonsDict.Remove(sprintKey);
 				_buttonsDict.Remove(freeLookKey);
 				if (UpdateBindings())
@@ -302,7 +302,7 @@ namespace ValheimMovementMods
 		}
 
 		private bool UpdateBindings()
-        {
+		{
 			try
 			{
 				Key key = (Key)Enum.Parse(typeof(Key), AutorunFreelookKey.Value);
@@ -362,18 +362,23 @@ namespace ValheimMovementMods
 
 		private bool IsInMenu()
 		{
-			return ZInput.GetButtonDown("Esc") || ZInput.GetButtonDown("JoyMenu") || (!AllowAutorunInInventory.Value && InventoryGui.IsVisible()) || (!AllowAutorunWhileInMap.Value && Minimap.IsOpen()) || Console.IsVisible() || TextInput.IsVisible() || ZNet.instance.InPasswordDialog() || StoreGui.IsVisible() || Hud.IsPieceSelectionVisible() || UnifiedPopup.IsVisible() || GameCamera.InFreeFly() || PlayerCustomizaton.IsBarberGuiVisible();
+			return ZInput.GetButtonDown("Esc") || ZInput.GetButtonDown("JoyMenu") || (!AllowAutorunWhileInMap.Value && Minimap.IsOpen()) || Console.IsVisible() || TextInput.IsVisible() || ZNet.instance.InPasswordDialog() || StoreGui.IsVisible() || Hud.IsPieceSelectionVisible() || UnifiedPopup.IsVisible() || GameCamera.InFreeFly() || PlayerCustomizaton.IsBarberGuiVisible();
+		}
+
+		private bool IsInInventory()
+		{
+			return InventoryGui.IsVisible();
 		}
 
 		private bool IsInChat()
-        {
+		{
 			return Chat.instance && Chat.instance.HasFocus();
 
 		}
 
 		private void Update()
 		{
-			if (Started && EnableToggle.Value && !IsInMenu() && !IsInChat())
+			if (Started && EnableToggle.Value && !IsInMenu() && !IsInChat() && !IsInInventory())
 			{
 				bool run = false;
 				if (SprintToggleAlternate.Value)
