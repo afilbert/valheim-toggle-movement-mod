@@ -40,6 +40,7 @@ namespace ValheimMovementMods
 		public static ConfigEntry<bool> AutorunStrafeForwardDisables;
 		public static ConfigEntry<bool> AutorunDisableOnInput;
 		public static ConfigEntry<bool> AutorunDisableOnNoStam;
+		public static ConfigEntry<bool> AutorunDisableOnEsc;
 		public static ConfigEntry<bool> ReequipWeaponAfterSwimming;
 		public static ConfigEntry<bool> RunToCrouchToggle;
 		public static ConfigEntry<bool> StopSneakMovementToggle;
@@ -83,6 +84,7 @@ namespace ValheimMovementMods
 			AutorunStrafeForwardDisables = Config.Bind<bool>("Auto-run", "AutorunStrafeForwardDisables", false, "Disable autorun if Forward key/button pressed while AutorunStrafe enabled");
 			AutorunDisableOnInput = Config.Bind<bool>("Auto-run", "AutorunDisableOnInput", false, "Disable autorun if directional key/button pressed while AutorunStrafe enabled");
 			AutorunDisableOnNoStam = Config.Bind<bool>("Auto-run", "AutorunDisableOnNoStam", false, "Disable autorun if zero stamina reached while AutorunStrafe enabled");
+			AutorunDisableOnEsc = Config.Bind<bool>("Auto-run", "AutorunDisableOnEsc", true, "Disable autorun if Esc key pressed");
 			AllowAutorunWhileInMap = Config.Bind<bool>("Auto-run", "AutorunInMap", true, "Keep running while viewing map");
 			AllowAutorunInInventory = Config.Bind<bool>("Auto-run", "AutorunInInventory", false, "Keep running while viewing inventory");
 			ReequipWeaponAfterSwimming = Config.Bind<bool>("Swim", "ReequipWeaponAfterSwimming", true, "Any weapon stowed in order to swim will reequip once out of swimming state");
@@ -362,7 +364,7 @@ namespace ValheimMovementMods
 
 		private bool IsInMenu()
 		{
-			return ZInput.GetButtonDown("Esc") || ZInput.GetButtonDown("JoyMenu") || (!AllowAutorunWhileInMap.Value && Minimap.IsOpen()) || Console.IsVisible() || TextInput.IsVisible() || ZNet.instance.InPasswordDialog() || StoreGui.IsVisible() || Hud.IsPieceSelectionVisible() || UnifiedPopup.IsVisible() || GameCamera.InFreeFly() || PlayerCustomizaton.IsBarberGuiVisible();
+			return (AutorunDisableOnEsc.Value && ZInput.GetButtonDown("Esc")) || ZInput.GetButtonDown("JoyMenu") || (!AllowAutorunWhileInMap.Value && Minimap.IsOpen()) || Console.IsVisible() || TextInput.IsVisible() || ZNet.instance.InPasswordDialog() || StoreGui.IsVisible() || Hud.IsPieceSelectionVisible() || UnifiedPopup.IsVisible() || GameCamera.InFreeFly() || PlayerCustomizaton.IsBarberGuiVisible();
 		}
 
 		private bool IsInInventory()
