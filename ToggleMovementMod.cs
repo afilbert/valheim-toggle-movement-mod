@@ -38,9 +38,8 @@ namespace ValheimMovementMods
 		public static ConfigEntry<string> AutorunFreelookKey;
 		public static ConfigEntry<bool> AutorunStrafe;
 		public static ConfigEntry<bool> AutorunStrafeForwardDisables;
-		public static ConfigEntry<bool> AutorunDisableOnInput;
-		public static ConfigEntry<bool> AutorunDisableOnNoStam;
 		public static ConfigEntry<bool> AutorunDisableOnEsc;
+		public static ConfigEntry<bool> AutorunSafeguardStamina;
 		public static ConfigEntry<bool> ReequipWeaponAfterSwimming;
 		public static ConfigEntry<bool> RunToCrouchToggle;
 		public static ConfigEntry<bool> StopSneakMovementToggle;
@@ -49,7 +48,6 @@ namespace ValheimMovementMods
 		public static ConfigEntry<float> SprintHealthOverride;
 		public static ConfigEntry<bool> TrackElapsedZeroStamToggle;
 		public static ConfigEntry<float> TrackElapsedZeroStamTime;
-		public static ConfigEntry<bool> OverrideAutorunSetting;
 		public static ConfigEntry<bool> AllowAutorunWhileInMap;
 		public static ConfigEntry<bool> VisuallyIndicateSprintState;
 		public static ConfigEntry<bool> SprintToggleOnAutorun;
@@ -73,18 +71,16 @@ namespace ValheimMovementMods
 			_plugin = this;
 			logger = Logger;
 			EnableToggle = Config.Bind<bool>("Mod Config", "Enable", true, "Enable this mod");
-			OverrideAutorunSetting = Config.Bind<bool>("Mod Config", "OverrideGameAutorun", true, "This overrides the new auto-run config setting that functions as a sprint toggle");
 			SprintToggle = Config.Bind<bool>("Sprint", "SprintToggle", true, "Sprint works like a toggle when true");
 			SprintToggleOnAutorun = Config.Bind<bool>("Sprint", "OnlyToggleWhenAutorunning", false, "Sprint only works like a toggle when auto-running");
-			SprintToggleAlternate = Config.Bind<bool>("SprintAlternate", "SprintToggleAlternate", false, "Sprint is toggled through use of another key/button");
-			SprintToggleAlternateKey = Config.Bind<string>("SprintAlternate", "SprintToggleAlternateKey", "T", "Used in conjunction with SprintToggleAlternate. This is the key used to toggle sprint on/off");
+			SprintToggleAlternate = Config.Bind<bool>("Sprint", "SprintToggleAlternate", false, "Sprint is toggled through use of another key/button");
+			SprintToggleAlternateKey = Config.Bind<string>("Sprint", "SprintToggleAlternateKey", "T", "Used in conjunction with SprintToggleAlternate. This is the key used to toggle sprint on/off");
 			AutorunOverride = Config.Bind<bool>("Auto-run", "AutorunToggle", true, "Fixes auto-run to follow look direction");
 			AutorunFreelookKey = Config.Bind<string>("Auto-run", "AutorunFreelookKey", "CapsLock", "Overrides look direction in auto-run while pressed");
 			AutorunStrafe = Config.Bind<bool>("Auto-run", "AutorunStrafe", true, "Enable strafing while in auto-run/crouch");
 			AutorunStrafeForwardDisables = Config.Bind<bool>("Auto-run", "AutorunStrafeForwardDisables", false, "Disable autorun if Forward key/button pressed while AutorunStrafe enabled");
-			AutorunDisableOnInput = Config.Bind<bool>("Auto-run", "AutorunDisableOnInput", false, "Disable autorun if directional key/button pressed while AutorunStrafe enabled");
-			AutorunDisableOnNoStam = Config.Bind<bool>("Auto-run", "AutorunDisableOnNoStam", false, "Disable autorun if zero stamina reached while AutorunStrafe enabled");
 			AutorunDisableOnEsc = Config.Bind<bool>("Auto-run", "AutorunDisableOnEsc", true, "Disable autorun if Esc key pressed");
+			AutorunSafeguardStamina = Config.Bind<bool>("Auto-run", "AutorunSafeguardStamina", true, "Enables stam safeguards that prevent stamina from running to zero");
 			AllowAutorunWhileInMap = Config.Bind<bool>("Auto-run", "AutorunInMap", true, "Keep running while viewing map");
 			AllowAutorunInInventory = Config.Bind<bool>("Auto-run", "AutorunInInventory", false, "Keep running while viewing inventory");
 			ReequipWeaponAfterSwimming = Config.Bind<bool>("Swim", "ReequipWeaponAfterSwimming", true, "Any weapon stowed in order to swim will reequip once out of swimming state");
@@ -134,9 +130,14 @@ namespace ValheimMovementMods
 
 				_plugin.MaybeUpdateConfigurableInput();
 
-				if (OverrideAutorunSetting.Value && !_plugin.IsInChat() && !_plugin.IsInInventory())
+				if ((SprintToggle.Value || SprintToggleOnAutorun.Value) && !_plugin.IsInChat() && !_plugin.IsInInventory())
 				{
 					run = ZInput.GetButton("Run") || ZInput.GetButton("JoyRun");
+
+					if (SprintToggleAlternate.Value)
+					{
+						run = ZInput.GetButtonUp("Sprint");
+					}
 				}
 
 				bool forwardDown = ZInput.GetButton("Forward") || ZInput.GetButton("JoyForward");
@@ -165,13 +166,13 @@ namespace ValheimMovementMods
 
 				if (!_plugin.IsInChat() && !_plugin.IsInInventory())
 				{
-					if (AutorunStrafe.Value && !AutorunDisableOnInput.Value)
+					if (AutorunStrafe.Value)
 					{
 						directionalDown = backwardDown || (AutorunStrafeForwardDisables.Value && forwardDown);
 					}
 					else
 					{
-						directionalDown = (!AutorunStrafe.Value || AutorunDisableOnInput.Value) && (forwardDown || backwardDown || leftDown || rightDown);
+						directionalDown = (forwardDown || backwardDown || leftDown || rightDown);
 					}
 				}
 
@@ -187,7 +188,7 @@ namespace ValheimMovementMods
 				{
 					equipmentAnimating = true;
 				}
-				if ((AutorunSet && AutorunOverride.Value && directionalDown) || (AutorunDisableOnNoStam.Value && __instance.GetStaminaPercentage() == 0))
+				if (AutorunSet && AutorunOverride.Value && directionalDown)
 				{
 					AutorunSet = false;
 				}
@@ -223,7 +224,7 @@ namespace ValheimMovementMods
 						___m_moveDir.Normalize();
 					}
 				}
-				if (__instance.GetStaminaPercentage() < StamRefillThreshold && !directionalDown)
+				if (AutorunSafeguardStamina.Value && __instance.GetStaminaPercentage() < StamRefillThreshold && !directionalDown)
 				{
 					StaminaRefilling = true;
 				}
@@ -337,7 +338,7 @@ namespace ValheimMovementMods
 		{
 			private static void Postfix(Hud __instance, ref Player player, ref TMP_Text ___m_staminaText, ref RectTransform ___m_staminaBar2Root, ref GuiBar ___m_staminaBar2Slow, ref GuiBar ___m_staminaBar2Fast)
 			{
-				if (EnableToggle.Value && VisuallyIndicateSprintState.Value && SprintToggle.Value && SprintSet)
+				if (EnableToggle.Value && VisuallyIndicateSprintState.Value && (SprintToggle.Value || SprintToggleOnAutorun.Value) && SprintSet)
 				{
 					___m_staminaBar2Fast.SetColor(new Color(1.0f, 0.64f, 0.0f));
 
@@ -383,13 +384,14 @@ namespace ValheimMovementMods
 			if (Started && EnableToggle.Value && !IsInMenu() && !IsInChat() && !IsInInventory())
 			{
 				bool run = false;
-				if (SprintToggleAlternate.Value)
-				{
-					run = ZInput.GetButtonUp("Sprint");
-				}
-				else if (SprintToggle.Value)
+				if (SprintToggle.Value || SprintToggleOnAutorun.Value)
 				{
 					run = ZInput.GetButtonUp("Run") || ZInput.GetButtonUp("JoyRun");
+
+					if (SprintToggleAlternate.Value)
+					{
+						run = ZInput.GetButtonUp("Sprint");
+					}
 				}
 
 				bool crouch = ZInput.GetButtonDown("Crouch") || ZInput.GetButtonDown("JoyCrouch");
@@ -405,7 +407,7 @@ namespace ValheimMovementMods
 				{
 					RunToCrouch = false;
 				}
-				if (!SprintToggle.Value)
+				if (!SprintToggle.Value && !SprintToggleOnAutorun.Value)
 				{
 					SprintSet = false;
 				}
@@ -417,7 +419,7 @@ namespace ValheimMovementMods
 				{
 					SprintSet = false;
 				}
-				if (run && SprintToggle.Value)
+				if (run && (SprintToggle.Value || SprintToggleOnAutorun.Value))
 				{
 					if (!SprintToggleOnAutorun.Value)
 					{
