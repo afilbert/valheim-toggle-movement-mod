@@ -33,6 +33,8 @@ namespace ValheimMovementMods
 		public static ConfigEntry<bool> SprintToggle;
 		public static ConfigEntry<bool> SprintToggleAlternate;
 		public static ConfigEntry<string> SprintToggleAlternateKey;
+		public static ConfigEntry<bool> SprintToggleOnAutorun;
+		public static ConfigEntry<bool> SprintTogglePersistsOnHalt;
 		public static ConfigEntry<bool> DisableStamLimitOnManualCntrl;
 		public static ConfigEntry<bool> AutorunOverride;
 		public static ConfigEntry<string> AutorunFreelookKey;
@@ -50,7 +52,6 @@ namespace ValheimMovementMods
 		public static ConfigEntry<float> TrackElapsedZeroStamTime;
 		public static ConfigEntry<bool> AllowAutorunWhileInMap;
 		public static ConfigEntry<bool> VisuallyIndicateSprintState;
-		public static ConfigEntry<bool> SprintToggleOnAutorun;
 		public static ConfigEntry<bool> AllowAutorunInInventory;
 		public static ConfigEntry<bool> DetoggleSprintAtLowStamWhenAttacking;
 		public static ConfigEntry<float> DetoggleSprintAtLowStamWhenAttackingThreshold;
@@ -73,6 +74,7 @@ namespace ValheimMovementMods
 			EnableToggle = Config.Bind<bool>("Mod Config", "Enable", true, "Enable this mod");
 			SprintToggle = Config.Bind<bool>("Sprint", "SprintToggle", true, "Sprint works like a toggle when true");
 			SprintToggleOnAutorun = Config.Bind<bool>("Sprint", "OnlyToggleWhenAutorunning", false, "Sprint only works like a toggle when auto-running");
+			SprintTogglePersistsOnHalt = Config.Bind<bool>("Sprint", "SprintTogglePersistsOnHalt", false, "Sprint stays toggled even after character halts");
 			SprintToggleAlternate = Config.Bind<bool>("Sprint", "SprintToggleAlternate", false, "Sprint is toggled through use of another key/button");
 			SprintToggleAlternateKey = Config.Bind<string>("Sprint", "SprintToggleAlternateKey", "T", "Used in conjunction with SprintToggleAlternate. This is the key used to toggle sprint on/off");
 			AutorunOverride = Config.Bind<bool>("Auto-run", "AutorunToggle", true, "Fixes auto-run to follow look direction");
@@ -126,6 +128,10 @@ namespace ValheimMovementMods
 				if (!SprintSet)
 				{
 					StaminaRefilling = false;
+				}
+				if (!SprintTogglePersistsOnHalt.Value && Math.Round(__instance.GetVelocity().magnitude) == 0)
+				{
+					SprintSet = false;
 				}
 
 				_plugin.MaybeUpdateConfigurableInput();
@@ -338,7 +344,7 @@ namespace ValheimMovementMods
 		{
 			private static void Postfix(Hud __instance, ref Player player, ref TMP_Text ___m_staminaText, ref RectTransform ___m_staminaBar2Root, ref GuiBar ___m_staminaBar2Slow, ref GuiBar ___m_staminaBar2Fast)
 			{
-				if (EnableToggle.Value && VisuallyIndicateSprintState.Value && (SprintToggle.Value || SprintToggleOnAutorun.Value) && SprintSet)
+				if (EnableToggle.Value && VisuallyIndicateSprintState.Value)
 				{
 					___m_staminaBar2Fast.SetColor(new Color(1.0f, 0.64f, 0.0f));
 
