@@ -1,7 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
-using Fishlabs.Valheim;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -43,6 +42,7 @@ namespace ValheimMovementMods
 		public static ConfigEntry<bool> AutorunStrafeForwardDisables;
 		public static ConfigEntry<bool> AutorunDisableOnEsc;
 		public static ConfigEntry<bool> AutorunSafeguardStamina;
+		public static ConfigEntry<bool> AutoJump;
 		public static ConfigEntry<bool> ReequipWeaponAfterSwimming;
 		public static ConfigEntry<bool> RunToCrouchToggle;
 		public static ConfigEntry<bool> StopSneakMovementToggle;
@@ -61,7 +61,7 @@ namespace ValheimMovementMods
 		public static string InitialSprintToggleAlternateKey;
 		public static string InitialAutorunFreelookKey;
 
-		public static bool StaminaRefilling = false, SprintSet = false, AutorunSet = false;
+		public static bool StaminaRefilling = false, JumpStamRefilling = false, SprintSet = false, AutorunSet = false;
 		public static bool RunToCrouch = false, Crouching = false, GameplaySettingAutorun = false;
 		public static float ElapsedTimeAtZeroStam = 0f, StamRefillThreshold = 0f, SprintHealthThreshold = 0f;
 
@@ -84,6 +84,7 @@ namespace ValheimMovementMods
 			AutorunStrafeForwardDisables = Config.Bind<bool>("Auto-run", "AutorunStrafeForwardDisables", false, "Disable autorun if Forward key/button pressed while AutorunStrafe enabled");
 			AutorunDisableOnEsc = Config.Bind<bool>("Auto-run", "AutorunDisableOnEsc", true, "Disable autorun if Esc key pressed");
 			AutorunSafeguardStamina = Config.Bind<bool>("Auto-run", "AutorunSafeguardStamina", true, "Enables stam safeguards that prevent stamina from running to zero");
+			AutoJump = Config.Bind<bool>("Auto-jump", "AutoJump", false, "Enables character to repeatedly jump until stamina exhausted, then wait until stamina filled before repeated process");
 			AllowAutorunWhileInMap = Config.Bind<bool>("Auto-run", "AutorunInMap", true, "Keep running while viewing map");
 			AllowAutorunInInventory = Config.Bind<bool>("Auto-run", "AutorunInInventory", false, "Keep running while viewing inventory");
 			ReequipWeaponAfterSwimming = Config.Bind<bool>("Swim", "ReequipWeaponAfterSwimming", true, "Any weapon stowed in order to swim will reequip once out of swimming state");
@@ -241,9 +242,14 @@ namespace ValheimMovementMods
 				{
 					StaminaRefilling = true;
 				}
+				if (AutoJump.Value && __instance.GetStaminaPercentage() == 0)
+                {
+					JumpStamRefilling = true;
+				}
 				if (__instance.GetStaminaPercentage() == 1)
 				{
 					StaminaRefilling = false;
+					JumpStamRefilling = false;
 				}
 				if (Crouching)
 				{
@@ -269,6 +275,10 @@ namespace ValheimMovementMods
 					{
 						run = true;
 						crouch = false;
+					}
+					if (AutoJump.Value && !JumpStamRefilling)
+					{
+						__instance.Jump();
 					}
 				}
 				if (SprintSet && __instance.GetStaminaPercentage() == 0)
