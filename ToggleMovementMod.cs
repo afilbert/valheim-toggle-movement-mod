@@ -1,12 +1,13 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using Fishlabs.Valheim;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using TMPro;
 
 namespace ValheimMovementMods
 {
@@ -61,7 +62,7 @@ namespace ValheimMovementMods
 		public static string InitialAutorunFreelookKey;
 
 		public static bool StaminaRefilling = false, SprintSet = false, AutorunSet = false;
-		public static bool RunToCrouch = false, Crouching = false;
+		public static bool RunToCrouch = false, Crouching = false, GameplaySettingAutorun = false;
 		public static float ElapsedTimeAtZeroStam = 0f, StamRefillThreshold = 0f, SprintHealthThreshold = 0f;
 
 		public static ItemDrop.ItemData EquippedItem = null;
@@ -129,10 +130,6 @@ namespace ValheimMovementMods
 				{
 					StaminaRefilling = false;
 				}
-				if (!SprintTogglePersistsOnHalt.Value && Math.Round(__instance.GetVelocity().magnitude) == 0)
-				{
-					SprintSet = false;
-				}
 
 				_plugin.MaybeUpdateConfigurableInput();
 
@@ -180,6 +177,16 @@ namespace ValheimMovementMods
 					{
 						directionalDown = (forwardDown || backwardDown || leftDown || rightDown);
 					}
+				}
+
+				if (ZInput.ToggleRun && !SprintTogglePersistsOnHalt.Value && !run)
+				{
+					SprintSet = false;
+				}
+
+				if (!ZInput.ToggleRun && !SprintTogglePersistsOnHalt.Value && ___m_moveDir.magnitude == 0)
+				{
+					SprintSet = false;
 				}
 
 				bool isWeaponLoaded = true;
@@ -253,6 +260,10 @@ namespace ValheimMovementMods
 					if (__instance.GetHealthPercentage() < SprintHealthThreshold && SafeguardStaminaOnLowHealth.Value)
 					{
 						SprintSet = false;
+					}
+					if (!SprintToggle.Value && !SprintToggleOnAutorun.Value && ZInput.ToggleRun && StaminaRefilling)
+					{
+						run = false;
 					}
 					if (SprintSet && (!StaminaRefilling || (forwardDown && DisableStamLimitOnManualCntrl.Value)) && isWeaponLoaded && !equipmentAnimating)
 					{
@@ -344,7 +355,7 @@ namespace ValheimMovementMods
 		{
 			private static void Postfix(Hud __instance, ref Player player, ref TMP_Text ___m_staminaText, ref RectTransform ___m_staminaBar2Root, ref GuiBar ___m_staminaBar2Slow, ref GuiBar ___m_staminaBar2Fast)
 			{
-				if (EnableToggle.Value && VisuallyIndicateSprintState.Value)
+				if (EnableToggle.Value && VisuallyIndicateSprintState.Value && SprintSet)
 				{
 					___m_staminaBar2Fast.SetColor(new Color(1.0f, 0.64f, 0.0f));
 
@@ -390,7 +401,7 @@ namespace ValheimMovementMods
 			if (Started && EnableToggle.Value && !IsInMenu() && !IsInChat() && !IsInInventory())
 			{
 				bool run = false;
-				if (SprintToggle.Value || SprintToggleOnAutorun.Value)
+				if (SprintToggle.Value || SprintToggleOnAutorun.Value || ZInput.ToggleRun)
 				{
 					run = ZInput.GetButtonUp("Run") || ZInput.GetButtonUp("JoyRun");
 
@@ -413,7 +424,7 @@ namespace ValheimMovementMods
 				{
 					RunToCrouch = false;
 				}
-				if (!SprintToggle.Value && !SprintToggleOnAutorun.Value)
+				if (!SprintToggle.Value && !SprintToggleOnAutorun.Value && !ZInput.ToggleRun)
 				{
 					SprintSet = false;
 				}
@@ -425,9 +436,9 @@ namespace ValheimMovementMods
 				{
 					SprintSet = false;
 				}
-				if (run && (SprintToggle.Value || SprintToggleOnAutorun.Value))
+				if (run && (SprintToggle.Value || SprintToggleOnAutorun.Value || ZInput.ToggleRun))
 				{
-					if (!SprintToggleOnAutorun.Value)
+					if (!SprintToggleOnAutorun.Value || ZInput.ToggleRun)
 					{
 						SprintSet = !SprintSet;
 					}
