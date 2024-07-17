@@ -6,7 +6,9 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using Valheim.SettingsGui;
 
 namespace ValheimMovementMods
 {
@@ -117,7 +119,7 @@ namespace ValheimMovementMods
 				{
 					return;
 				}
-				if (!__instance || _plugin.IsInMenu() || (!AllowAutorunInInventory.Value && _plugin.IsInInventory()))
+				if (!__instance || _plugin.IsInMenu() || __instance.InPlaceMode() || __instance.InRepairMode() || (!AllowAutorunInInventory.Value && _plugin.IsInInventory()))
 				{
 					___m_autoRun = false;
 					AutorunSet = false;
@@ -180,12 +182,12 @@ namespace ValheimMovementMods
 					}
 				}
 
-				if (ZInput.ToggleRun && !SprintTogglePersistsOnHalt.Value && !run)
+				if (ZInput.ToggleRun && !SprintTogglePersistsOnHalt.Value && ___m_moveDir.magnitude == 0)
 				{
 					SprintSet = false;
 				}
 
-				if (!ZInput.ToggleRun && !SprintTogglePersistsOnHalt.Value && ___m_moveDir.magnitude == 0)
+				if (!ZInput.ToggleRun && (SprintToggle.Value || SprintToggleOnAutorun.Value) && !SprintTogglePersistsOnHalt.Value && ___m_moveDir.magnitude == 0)
 				{
 					SprintSet = false;
 				}
@@ -314,6 +316,45 @@ namespace ValheimMovementMods
 				_inputInstance.AddButton("Esc", key);
 				_plugin.UpdateBindings();
 			}
+		}
+
+		[HarmonyPatch(typeof(GameplaySettings), "LoadSettings")]
+		private class GameplaySettings_PatchLoadSettings
+		{
+			private static void Postfix(GameplaySettings __instance, Toggle ___m_toggleRun, TMP_Text ___m_language)
+			{
+				if(EnableToggle.Value && __instance != null && ___m_toggleRun != null)
+				{
+					_plugin.SetCustomToggleLabelText(___m_language, new Vector2(0, -62));
+				}
+			}
+		}
+
+		[HarmonyPatch(typeof(AccessibilitySettings), "LoadSettings")]
+		private class AccessibilitySettings_PatchLoadSettings
+		{
+			private static void Postfix(GameplaySettings __instance, Toggle ___m_toggleRun, TMP_Text ___m_guiScaleText)
+			{
+				logger.LogInfo($"Loading settings");
+				if (EnableToggle.Value && __instance != null && ___m_toggleRun != null)
+				{
+					_plugin.SetCustomToggleLabelText(___m_guiScaleText, new Vector2(-260, -59));
+				}
+			}
+		}
+
+		private void SetCustomToggleLabelText(TMP_Text textToClone, Vector2 position)
+		{
+			TMP_Text clonedText = Instantiate(textToClone, textToClone.transform);
+
+			clonedText.rectTransform.anchoredPosition = position;
+
+			clonedText.text = "Causes Run control to function as a toggle";
+			clonedText.font = textToClone.font;
+			clonedText.fontSize = textToClone.fontSize;
+			clonedText.color = textToClone.color;
+			clonedText.alignment = textToClone.alignment;
+			clonedText.rectTransform.sizeDelta = textToClone.rectTransform.sizeDelta;
 		}
 
 		private void MaybeUpdateConfigurableInput()
