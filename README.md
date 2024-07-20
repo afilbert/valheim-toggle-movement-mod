@@ -22,6 +22,7 @@ Have you ever played so much Valheim that you injured yourself? Well, I did. Whe
 * Sprint will detoggle automatically if stamina at zero for elapsed time (5 seconds by default)
   *	This can happen if forward key/button is held, overriding other stamina safeguards
 * Weapons will auto-reequip on exiting swim state if stowed while swimming
+* Auto-jump can optionally function as a toggle
 * Fully configurable
 
 ## QOL Detail
@@ -75,17 +76,21 @@ v0.0.3 introduced the ability to equip/switch weapons during auto-run while spri
 Configuration allows:
 
 * **Enable**, Enable the mod, default: true
-* **OverrideGameAutorun**, This overrides the new auto-run config setting that functions as a sprint toggle, default: true
 * **SprintToggle**, Sprint works like a toggle, default: true
 * **OnlyToggleWhenAutorunning**, Sprint only works like a toggle when auto-running, default: false
 * **SprintToggleAlternate**, Sprint is toggled through use of another key/button, default: false
 * **SprintToggleAlternateKey**, Used in conjunction with SprintToggleAlternate. This is the key used to toggle sprint on/off, default: T
+* **SprintTogglePersistsOnHalt**, Sprint stays toggled even after character halts, default: false
+* **AutoJumpToggle**, Enables character jump input to function as a toggle with stamina safeguards, default: false
 * **AutorunToggle**, Fixes auto-run to follow look, default: true
 * **AutorunFreelookKey**, Overrides look direction in auto-run while pressed, default: CapsLock
 * **AutorunStrafe**, Enable strafing while in auto-run/crouch, default: true
 * **AutorunStrafeForwardDisables**, Disable autorun if Forward key/button pressed while AutorunStrafe enabled, default: true
+* **AutorunSafeguardStamina**, Enables stam safeguards that prevent stamina from running to zero, default: true
 * **AutorunInMap**, Keep running while viewing map, default: true
 * **AutorunInInventory**, Keep running while viewing inventory, default: false
+* **AddAutorunMenuLabels**, Adds helpful label to vanilla Auto-run toggle in both Gameplay and Accessibility settings menus, default: true
+* **AutorunDisableOnEsc**, Disable autorun if Esc key pressed, default: true
 * **ReequipWeaponAfterSwimming**, Any weapon stowed in order to swim will reequip once out of swimming state, default: true
 * **RunToCrouchToggle**, Go from run to crouch with the click of a button, default: true
 * **StopSneakOnNoStam**, Stops sneak movement if no stamina available, default: true
@@ -107,6 +112,14 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 1.3.0 Add auto-jump feature and many improvements and tweaks
+  * Add label to vanilla Auto-run setting in both Gameplay and Accessibility menus that concisely describes the hover text
+  * Add config that allows character movement to continue even after Esc key is pressed
+  * Add config that allows the mod sprint behavior to function like the vanilla auto-run, which detoggles when character comes to a halt or runs out of stamina
+  * Add logic that allows the mod play nicely with the vanilla Auto-run setting (and vice versa)
+  * Refactor config to reduce redundant/overlapping config setting. Removes OverrideGameAutorun, which can be achieved through combo of other config
+  * Fix bug that prevented mod config keymappings changes (changing from defaults of `T` or `CapsLock`) from taking effect until the Reset Controls button was pressed in game settings
+  * Fix bugs that triggered character movement or behavior while in chat, inventory, and/or build/repair menus
 * 1.2.0 Detoggle auto-run by default if at low stam when attacking, with configurable stam threshold
   * Ashlands combat proves challenging with mod enabled without this config option, as stamina gets pinned to zero indefinitely while attacking hordes of mobs
 * 1.1.0 Add config to only toggle sprinting when auto-running, and/or allow auto-running while in inventory
