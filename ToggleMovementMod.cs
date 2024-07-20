@@ -64,7 +64,7 @@ namespace ValheimMovementMods
 		public static string InitialAutorunFreelookKey;
 
 		public static bool StaminaRefilling = false, JumpStamRefilling = false, SprintSet = false, AutorunSet = false;
-		public static bool RunToCrouch = false, Crouching = false, GameplaySettingAutorun = false;
+		public static bool RunToCrouch = false, Crouching = false, GameplaySettingAutorun = false, AutoJumpSet = false;
 		public static float ElapsedTimeAtZeroStam = 0f, StamRefillThreshold = 0f, SprintHealthThreshold = 0f;
 
 		public static ItemDrop.ItemData EquippedItem = null;
@@ -86,7 +86,7 @@ namespace ValheimMovementMods
 			AutorunStrafeForwardDisables = Config.Bind<bool>("Auto-run", "AutorunStrafeForwardDisables", false, "Disable autorun if Forward key/button pressed while AutorunStrafe enabled");
 			AutorunDisableOnEsc = Config.Bind<bool>("Auto-run", "AutorunDisableOnEsc", true, "Disable autorun if Esc key pressed");
 			AutorunSafeguardStamina = Config.Bind<bool>("Auto-run", "AutorunSafeguardStamina", true, "Enables stam safeguards that prevent stamina from running to zero");
-			AutoJump = Config.Bind<bool>("Auto-jump", "AutoJump", false, "Enables character to repeatedly jump until stamina exhausted, then wait until stamina filled before repeated process");
+			AutoJump = Config.Bind<bool>("Auto-jump", "AutoJumpToggle", false, "Enables character jump input to function as a toggle with stamina safeguards");
 			AllowAutorunWhileInMap = Config.Bind<bool>("Auto-run", "AutorunInMap", true, "Keep running while viewing map");
 			AllowAutorunInInventory = Config.Bind<bool>("Auto-run", "AutorunInInventory", false, "Keep running while viewing inventory");
 			ReequipWeaponAfterSwimming = Config.Bind<bool>("Swim", "ReequipWeaponAfterSwimming", true, "Any weapon stowed in order to swim will reequip once out of swimming state");
@@ -244,7 +244,7 @@ namespace ValheimMovementMods
 				{
 					StaminaRefilling = true;
 				}
-				if (AutoJump.Value && __instance.GetStaminaPercentage() == 0)
+				if (AutoJump.Value && AutoJumpSet && __instance.GetStaminaPercentage() == 0)
                 {
 					JumpStamRefilling = true;
 				}
@@ -278,7 +278,7 @@ namespace ValheimMovementMods
 						run = true;
 						crouch = false;
 					}
-					if (AutoJump.Value && !JumpStamRefilling)
+					if (AutoJump.Value && AutoJumpSet && !JumpStamRefilling)
 					{
 						__instance.Jump();
 					}
@@ -464,6 +464,7 @@ namespace ValheimMovementMods
 
 				bool crouch = ZInput.GetButtonDown("Crouch") || ZInput.GetButtonDown("JoyCrouch");
 				bool autoRun = ZInput.GetButtonDown("AutoRun");
+				bool jump = ZInput.GetButtonDown("Jump");
 
 				bool backwardDown = ZInput.GetButton("Backward") || ZInput.GetButton("JoyBackward");
 
@@ -501,6 +502,10 @@ namespace ValheimMovementMods
 				if (crouch && RunToCrouchToggle.Value)
 				{
 					Crouching = !Crouching;
+				}
+				if (jump && AutoJump.Value)
+				{
+					AutoJumpSet = !AutoJumpSet;
 				}
 				if (AutorunSet && backwardDown)
 				{
