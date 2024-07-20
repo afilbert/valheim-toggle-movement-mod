@@ -58,6 +58,7 @@ namespace ValheimMovementMods
 		public static ConfigEntry<bool> AllowAutorunInInventory;
 		public static ConfigEntry<bool> DetoggleSprintAtLowStamWhenAttacking;
 		public static ConfigEntry<float> DetoggleSprintAtLowStamWhenAttackingThreshold;
+		public static ConfigEntry<bool> AddAutorunMenuLabels;
 
 
 		public static string InitialSprintToggleAlternateKey;
@@ -89,6 +90,7 @@ namespace ValheimMovementMods
 			AutoJump = Config.Bind<bool>("Auto-jump", "AutoJumpToggle", false, "Enables character jump input to function as a toggle with stamina safeguards");
 			AllowAutorunWhileInMap = Config.Bind<bool>("Auto-run", "AutorunInMap", true, "Keep running while viewing map");
 			AllowAutorunInInventory = Config.Bind<bool>("Auto-run", "AutorunInInventory", false, "Keep running while viewing inventory");
+			AddAutorunMenuLabels = Config.Bind<bool>("Auto-run", "AddAutorunMenuLabels", true, "Adds helpful label to vanilla Auto-run toggle in both Gameplay and Accessibility settings menus");
 			ReequipWeaponAfterSwimming = Config.Bind<bool>("Swim", "ReequipWeaponAfterSwimming", true, "Any weapon stowed in order to swim will reequip once out of swimming state");
 			RunToCrouchToggle = Config.Bind<bool>("Auto-sneak", "RunToCrouchToggle", true, "Allows going from full run to crouch with a click of the crouch button (and vice versa)");
 			StopSneakMovementToggle = Config.Bind<bool>("Auto-sneak", "StopSneakOnNoStam", true, "Stops sneak movement if no stamina available. Stock behavior is to pop out of sneak into walk");
@@ -323,7 +325,7 @@ namespace ValheimMovementMods
 		{
 			private static void Postfix(GameplaySettings __instance, Toggle ___m_toggleRun, TMP_Text ___m_language)
 			{
-				if(EnableToggle.Value && __instance != null && ___m_toggleRun != null)
+				if(EnableToggle.Value && AddAutorunMenuLabels.Value && __instance != null && ___m_toggleRun != null)
 				{
 					_plugin.SetCustomToggleLabelText(___m_language, new Vector2(0, -62));
 				}
@@ -336,7 +338,7 @@ namespace ValheimMovementMods
 			private static void Postfix(GameplaySettings __instance, Toggle ___m_toggleRun, TMP_Text ___m_guiScaleText)
 			{
 				logger.LogInfo($"Loading settings");
-				if (EnableToggle.Value && __instance != null && ___m_toggleRun != null)
+				if (EnableToggle.Value && AddAutorunMenuLabels.Value && __instance != null && ___m_toggleRun != null)
 				{
 					_plugin.SetCustomToggleLabelText(___m_guiScaleText, new Vector2(-260, -59));
 				}
