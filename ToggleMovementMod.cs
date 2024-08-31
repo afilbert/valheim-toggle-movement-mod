@@ -18,7 +18,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "1.3.0";
+		const string pluginVersion = "1.4.0";
 		const string freeLookKey = "FreeLook";
 		const string sprintKey = "Sprint";
 
@@ -45,6 +45,7 @@ namespace ValheimMovementMods
 		public static ConfigEntry<bool> AutorunDisableOnEsc;
 		public static ConfigEntry<bool> AutorunSafeguardStamina;
 		public static ConfigEntry<bool> AutoJump;
+		public static ConfigEntry<bool> AutoPrimaryAttack;
 		public static ConfigEntry<bool> ReequipWeaponAfterSwimming;
 		public static ConfigEntry<bool> RunToCrouchToggle;
 		public static ConfigEntry<bool> StopSneakMovementToggle;
@@ -66,6 +67,7 @@ namespace ValheimMovementMods
 
 		public static bool StaminaRefilling = false, JumpStamRefilling = false, SprintSet = false, AutorunSet = false;
 		public static bool RunToCrouch = false, Crouching = false, GameplaySettingAutorun = false, AutoJumpSet = false;
+		public static bool AttackStamRefilling = false, AutoPrimaryAttackSet = false;
 		public static float ElapsedTimeAtZeroStam = 0f, StamRefillThreshold = 0f, SprintHealthThreshold = 0f;
 
 		public static ItemDrop.ItemData EquippedItem = null;
@@ -91,6 +93,7 @@ namespace ValheimMovementMods
 			AllowAutorunWhileInMap = Config.Bind<bool>("Auto-run", "AutorunInMap", true, "Keep running while viewing map");
 			AllowAutorunInInventory = Config.Bind<bool>("Auto-run", "AutorunInInventory", false, "Keep running while viewing inventory");
 			AddAutorunMenuLabels = Config.Bind<bool>("Auto-run", "AddAutorunMenuLabels", true, "Adds helpful label to vanilla Auto-run toggle in both Gameplay and Accessibility settings menus");
+			AutoPrimaryAttack = Config.Bind<bool>("Auto-attack", "AutoPrimaryAttackToggle", false, "Enables character primary attack input to function as a toggle with stamina safeguards");
 			ReequipWeaponAfterSwimming = Config.Bind<bool>("Swim", "ReequipWeaponAfterSwimming", true, "Any weapon stowed in order to swim will reequip once out of swimming state");
 			RunToCrouchToggle = Config.Bind<bool>("Auto-sneak", "RunToCrouchToggle", true, "Allows going from full run to crouch with a click of the crouch button (and vice versa)");
 			StopSneakMovementToggle = Config.Bind<bool>("Auto-sneak", "StopSneakOnNoStam", true, "Stops sneak movement if no stamina available. Stock behavior is to pop out of sneak into walk");
@@ -115,8 +118,10 @@ namespace ValheimMovementMods
 		[HarmonyPatch(typeof(Player), "SetControls")]
 		private class ToggleMovement
 		{
-			private static void Prefix(ref Player __instance, ref Vector3 movedir, ref bool run, ref bool crouch, ref Vector3 ___m_lookDir, ref Vector3 ___m_moveDir, ref bool ___m_autoRun, ref bool ___m_crouchToggled, ref string ___m_actionAnimation, ref List<Player.MinorActionData> ___m_actionQueue)
+			private static void Prefix(ref Player __instance, ref Vector3 movedir, ref bool attack, ref bool run, ref bool crouch, ref Vector3 ___m_lookDir, ref Vector3 ___m_moveDir, ref bool ___m_autoRun, ref bool ___m_crouchToggled, ref string ___m_actionAnimation, ref List<Player.MinorActionData> ___m_actionQueue)
 			{
+				_plugin.PrivateUpdate();
+
 				if (!EnableToggle.Value)
 				{
 					return;
@@ -247,13 +252,18 @@ namespace ValheimMovementMods
 					StaminaRefilling = true;
 				}
 				if (AutoJump.Value && AutoJumpSet && __instance.GetStaminaPercentage() == 0)
-                {
+				{
 					JumpStamRefilling = true;
+				}
+				if (AutoPrimaryAttack.Value && AutoPrimaryAttackSet && __instance.GetStaminaPercentage() <= 0.01)
+				{
+					AttackStamRefilling = true;
 				}
 				if (__instance.GetStaminaPercentage() == 1)
 				{
 					StaminaRefilling = false;
 					JumpStamRefilling = false;
+					AttackStamRefilling = false;
 				}
 				if (Crouching)
 				{
@@ -283,6 +293,10 @@ namespace ValheimMovementMods
 					if (AutoJump.Value && AutoJumpSet && !JumpStamRefilling)
 					{
 						__instance.Jump();
+					}
+					if (AutoPrimaryAttack.Value && AutoPrimaryAttackSet && !AttackStamRefilling)
+					{
+						attack = true;
 					}
 				}
 				if (SprintSet && __instance.GetStaminaPercentage() == 0)
@@ -449,7 +463,7 @@ namespace ValheimMovementMods
 
 		}
 
-		private void Update()
+		private void PrivateUpdate()
 		{
 			if (Started && EnableToggle.Value && !IsInMenu() && !IsInChat() && !IsInInventory())
 			{
@@ -464,6 +478,7 @@ namespace ValheimMovementMods
 					}
 				}
 
+				bool attack = ZInput.GetButtonDown("Attack");
 				bool crouch = ZInput.GetButtonDown("Crouch") || ZInput.GetButtonDown("JoyCrouch");
 				bool autoRun = ZInput.GetButtonDown("AutoRun");
 				bool jump = ZInput.GetButtonDown("Jump");
@@ -508,6 +523,10 @@ namespace ValheimMovementMods
 				if (jump && AutoJump.Value)
 				{
 					AutoJumpSet = !AutoJumpSet;
+				}
+				if (attack && AutoPrimaryAttack.Value)
+				{
+					AutoPrimaryAttackSet = !AutoPrimaryAttackSet;
 				}
 				if (AutorunSet && backwardDown)
 				{
