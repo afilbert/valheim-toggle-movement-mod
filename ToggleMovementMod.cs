@@ -147,7 +147,7 @@ namespace ValheimMovementMods
 				{
 					run = ZInput.GetButton("Run") || ZInput.GetButton("JoyRun");
 
-					if (SprintToggleAlternate.Value)
+					if (SprintToggleAlternate.Value && !run)
 					{
 						run = ZInput.GetButtonUp("Sprint");
 					}
@@ -329,7 +329,7 @@ namespace ValheimMovementMods
 				_inputInstance = __instance;
 				_buttonsDict = ___m_buttons;
 				Key key = (Key)Enum.Parse(typeof(Key), "Escape");
-				_inputInstance.AddButton("Esc", key);
+				_inputInstance.AddButton("Esc", ZInput.KeyToPath(key));
 				_plugin.UpdateBindings();
 			}
 		}
@@ -393,9 +393,9 @@ namespace ValheimMovementMods
 			try
 			{
 				Key key = (Key)Enum.Parse(typeof(Key), AutorunFreelookKey.Value);
-				_inputInstance.AddButton(freeLookKey, key);
+				_inputInstance.AddButton(freeLookKey, ZInput.KeyToPath(key));
 				key = (Key)Enum.Parse(typeof(Key), SprintToggleAlternateKey.Value);
-				_inputInstance.AddButton(sprintKey, key);
+				_inputInstance.AddButton(sprintKey, ZInput.KeyToPath(key));
 				logger.LogInfo($"Bindings - Free look: {AutorunFreelookKey.Value}. Toggle alternate: {SprintToggleAlternateKey.Value}");
 
 				return true;
