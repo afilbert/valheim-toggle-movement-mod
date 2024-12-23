@@ -23,6 +23,7 @@ Have you ever played so much Valheim that you injured yourself? Well, I did. Whe
   *	This can happen if forward key/button is held, overriding other stamina safeguards
 * Weapons will auto-reequip on exiting swim state if stowed while swimming
 * Auto-jump can optionally function as a toggle
+* Auto-primary-attack can optionally function as a toggle
 * Fully configurable
 
 ## QOL Detail
@@ -82,6 +83,7 @@ Configuration allows:
 * **SprintToggleAlternateKey**, Used in conjunction with SprintToggleAlternate. This is the key used to toggle sprint on/off, default: T
 * **SprintTogglePersistsOnHalt**, Sprint stays toggled even after character halts, default: false
 * **AutoJumpToggle**, Enables character jump input to function as a toggle with stamina safeguards, default: false
+* **AutoPrimaryAttackToggle**, Enables character primary attack input to function as a toggle with stamina safeguards, default: false
 * **AutorunToggle**, Fixes auto-run to follow look, default: true
 * **AutorunFreelookKey**, Overrides look direction in auto-run while pressed, default: CapsLock
 * **AutorunStrafe**, Enable strafing while in auto-run/crouch, default: true
@@ -112,6 +114,7 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 1.4.0 Support The Bog Witch update. Add auto-attack feature. Optimize the main loop to prevent toggle lock in certain scenarios
 * 1.3.0 Add auto-jump feature and many improvements and tweaks
   * Add label to vanilla Auto-run setting in both Gameplay and Accessibility menus that concisely describes the hover text
   * Add config that allows character movement to continue even after Esc key is pressed

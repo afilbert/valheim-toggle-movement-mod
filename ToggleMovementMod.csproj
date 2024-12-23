@@ -29,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -38,9 +39,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Libs\assembly_guiutils.dll</HintPath>
     </Reference>
-    <Reference Include="assembly_utils, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Libs\assembly_utils.dll</HintPath>
+    <Reference Include="assembly_utils_publicized">
+      <HintPath>Libs\publicized_assemblies\assembly_utils_publicized.dll</HintPath>
     </Reference>
     <Reference Include="assembly_valheim, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
