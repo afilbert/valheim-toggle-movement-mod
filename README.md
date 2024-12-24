@@ -114,6 +114,7 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 1.4.1 Fix auto-sneak bug that got stuck at the stam regen threshold
 * 1.4.0 Support The Bog Witch update. Add auto-attack feature. Optimize the main loop to prevent toggle lock in certain scenarios
 * 1.3.0 Add auto-jump feature and many improvements and tweaks
   * Add label to vanilla Auto-run setting in both Gameplay and Accessibility menus that concisely describes the hover text

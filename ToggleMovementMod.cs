@@ -18,7 +18,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "1.4.0";
+		const string pluginVersion = "1.4.1";
 		const string freeLookKey = "FreeLook";
 		const string sprintKey = "Sprint";
 
@@ -136,8 +136,7 @@ namespace ValheimMovementMods
 				{
 					Started = true;
 				}
-				if (!SprintSet)
-				{
+				if (!SprintSet && !Crouching) {
 					StaminaRefilling = false;
 				}
 
@@ -259,7 +258,7 @@ namespace ValheimMovementMods
 				{
 					AttackStamRefilling = true;
 				}
-				if (__instance.GetStaminaPercentage() == 1)
+				if (__instance.GetStaminaPercentage() >= 1)
 				{
 					StaminaRefilling = false;
 					JumpStamRefilling = false;
