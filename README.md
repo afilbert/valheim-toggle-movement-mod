@@ -91,7 +91,6 @@ Configuration allows:
 * **AutorunSafeguardStamina**, Enables stam safeguards that prevent stamina from running to zero, default: true
 * **AutorunInMap**, Keep running while viewing map, default: true
 * **AutorunInInventory**, Keep running while viewing inventory, default: false
-* **AddAutorunMenuLabels**, Adds helpful label to vanilla Auto-run toggle in both Gameplay and Accessibility settings menus, default: true
 * **AutorunDisableOnEsc**, Disable autorun if Esc key pressed, default: true
 * **ReequipWeaponAfterSwimming**, Any weapon stowed in order to swim will reequip once out of swimming state, default: true
 * **RunToCrouchToggle**, Go from run to crouch with the click of a button, default: true
@@ -114,6 +113,7 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 1.4.3 Patch 0.221.10 fix. Remove vanilla Auto-run setting labels from Gameplay and Accessibility menus. Removes AddAutorunMenuLabels config option. Implementation was brittle and not necessary
 * 1.4.2 Clean up debugging logging
 * 1.4.1 Fix auto-sneak bug that got stuck at the stam regen threshold
 * 1.4.0 Support The Bog Witch update. Add auto-attack feature. Optimize the main loop to prevent toggle lock in certain scenarios

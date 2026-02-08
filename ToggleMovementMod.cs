@@ -6,9 +6,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.InputSystem;
-using Valheim.SettingsGui;
 
 namespace ValheimMovementMods
 {
@@ -18,7 +16,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "1.4.2";
+		const string pluginVersion = "1.4.3";
 		const string freeLookKey = "FreeLook";
 		const string sprintKey = "Sprint";
 
@@ -59,8 +57,6 @@ namespace ValheimMovementMods
 		public static ConfigEntry<bool> AllowAutorunInInventory;
 		public static ConfigEntry<bool> DetoggleSprintAtLowStamWhenAttacking;
 		public static ConfigEntry<float> DetoggleSprintAtLowStamWhenAttackingThreshold;
-		public static ConfigEntry<bool> AddAutorunMenuLabels;
-
 
 		public static string InitialSprintToggleAlternateKey;
 		public static string InitialAutorunFreelookKey;
@@ -92,7 +88,6 @@ namespace ValheimMovementMods
 			AutoJump = Config.Bind<bool>("Auto-jump", "AutoJumpToggle", false, "Enables character jump input to function as a toggle with stamina safeguards");
 			AllowAutorunWhileInMap = Config.Bind<bool>("Auto-run", "AutorunInMap", true, "Keep running while viewing map");
 			AllowAutorunInInventory = Config.Bind<bool>("Auto-run", "AutorunInInventory", false, "Keep running while viewing inventory");
-			AddAutorunMenuLabels = Config.Bind<bool>("Auto-run", "AddAutorunMenuLabels", true, "Adds helpful label to vanilla Auto-run toggle in both Gameplay and Accessibility settings menus");
 			AutoPrimaryAttack = Config.Bind<bool>("Auto-attack", "AutoPrimaryAttackToggle", false, "Enables character primary attack input to function as a toggle with stamina safeguards");
 			ReequipWeaponAfterSwimming = Config.Bind<bool>("Swim", "ReequipWeaponAfterSwimming", true, "Any weapon stowed in order to swim will reequip once out of swimming state");
 			RunToCrouchToggle = Config.Bind<bool>("Auto-sneak", "RunToCrouchToggle", true, "Allows going from full run to crouch with a click of the crouch button (and vice versa)");
@@ -331,45 +326,6 @@ namespace ValheimMovementMods
 				_inputInstance.AddButton("Esc", ZInput.KeyToPath(key));
 				_plugin.UpdateBindings();
 			}
-		}
-
-		[HarmonyPatch(typeof(GameplaySettings), "LoadSettings")]
-		private class GameplaySettings_PatchLoadSettings
-		{
-			private static void Postfix(GameplaySettings __instance, Toggle ___m_toggleRun, TMP_Text ___m_language)
-			{
-				if(EnableToggle.Value && AddAutorunMenuLabels.Value && __instance != null && ___m_toggleRun != null)
-				{
-					_plugin.SetCustomToggleLabelText(___m_language, new Vector2(0, -62));
-				}
-			}
-		}
-
-		[HarmonyPatch(typeof(AccessibilitySettings), "LoadSettings")]
-		private class AccessibilitySettings_PatchLoadSettings
-		{
-			private static void Postfix(GameplaySettings __instance, Toggle ___m_toggleRun, TMP_Text ___m_guiScaleText)
-			{
-				logger.LogInfo($"Loading settings");
-				if (EnableToggle.Value && AddAutorunMenuLabels.Value && __instance != null && ___m_toggleRun != null)
-				{
-					_plugin.SetCustomToggleLabelText(___m_guiScaleText, new Vector2(-260, -59));
-				}
-			}
-		}
-
-		private void SetCustomToggleLabelText(TMP_Text textToClone, Vector2 position)
-		{
-			TMP_Text clonedText = Instantiate(textToClone, textToClone.transform);
-
-			clonedText.rectTransform.anchoredPosition = position;
-
-			clonedText.text = "Causes Run control to function as a toggle";
-			clonedText.font = textToClone.font;
-			clonedText.fontSize = textToClone.fontSize;
-			clonedText.color = textToClone.color;
-			clonedText.alignment = textToClone.alignment;
-			clonedText.rectTransform.sizeDelta = textToClone.rectTransform.sizeDelta;
 		}
 
 		private void MaybeUpdateConfigurableInput()
