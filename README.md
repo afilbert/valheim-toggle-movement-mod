@@ -100,7 +100,7 @@ Configuration allows:
 * **SafeguardStaminaOnLowHealthToggle**", Allow stamina to recover on low health by automatically detoggling sprint, default: true
 * **SprintHealthOverridePercentValue**, Percentage of health to detoggle sprint so stamina can start to recover, default: 30%
 * **TrackElapsedZeroStamToggle**, Automatically toggle off sprint after elapsed time spent at zero stamina, default: true
-* **TrackElapsedZeroStamTime**, Seconds to wait at zero stamina before toggling off sprint, default: 5 seconds
+* **TrackElapsedZeroStamTime**, Seconds to wait at zero stamina before toggling off sprint, default: 2 seconds
 * **ChangeStamColorOnSprint**, Changes stamina bar color to orange when draining and sprint enabled, and blue when stam regenerating. Flashes empty bar if stam drained fully while sprinting, default: true
 * **DetoggleSprintAtLowStamWhenAttacking**, Detoggles sprint if attacking at low stamina, default: true
 * **DetoggleSprintAtLowStamWhenAttackingThreshold**, Threshold at which stamina will detoggle sprint if also attacking, default: 0.04f
@@ -113,6 +113,7 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 1.4.4 Valheim 1.0 Deep North support. Pin latest BepInEx. Tweak default TrackElapsedZeroStamTime from 5 seconds to 2 seconds
 * 1.4.3 Patch 0.221.10 fix. Remove vanilla Auto-run setting labels from Gameplay and Accessibility menus. Removes AddAutorunMenuLabels config option. Implementation was brittle and not necessary
 * 1.4.2 Clean up debugging logging
 * 1.4.1 Fix auto-sneak bug that got stuck at the stam regen threshold
