@@ -16,7 +16,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "1.4.3";
+		const string pluginVersion = "1.4.4";
 		const string freeLookKey = "FreeLook";
 		const string sprintKey = "Sprint";
 
@@ -99,7 +99,7 @@ namespace ValheimMovementMods
 			SprintHealthOverride = Config.Bind<float>("Stamina", "SprintHealthOverridePercentValue", 30f, "Percentage of health to detoggle sprint so stamina can start to recover");
 			SprintHealthThreshold = SprintHealthOverride.Value / 100f;
 			TrackElapsedZeroStamToggle = Config.Bind<bool>("Stamina", "TrackElapsedZeroStamToggle", true, "Automatically toggle off sprint after elapsed time spent at zero stamina");
-			TrackElapsedZeroStamTime = Config.Bind<float>("Stamina", "TrackElapsedZeroStamTime", 5f, "Seconds to wait at zero stamina before toggling off sprint");
+			TrackElapsedZeroStamTime = Config.Bind<float>("Stamina", "TrackElapsedZeroStamTime", 2f, "Seconds to wait at zero stamina before toggling off sprint");
 			VisuallyIndicateSprintState = Config.Bind<bool>("Stamina", "ChangeStamColorOnSprint", true, "Changes stamina bar color to orange when draining and sprint enabled, and blue when stam regenerating. Flashes empty bar if stam drained fully while sprinting");
 			DetoggleSprintAtLowStamWhenAttacking = Config.Bind<bool>("Stamina", "DetoggleSprintAtLowStamWhenAttacking", true, "Detoggles sprint if attacking at low stamina");
 			DetoggleSprintAtLowStamWhenAttackingThreshold = Config.Bind<float>("Stamina", "DetoggleSprintAtLowStamWhenAttackingThreshold", 0.04f, "Threshold at which stamina will detoggle sprint if also attacking");
@@ -183,12 +183,19 @@ namespace ValheimMovementMods
 					}
 				}
 
-				if (ZInput.ToggleRun && !SprintTogglePersistsOnHalt.Value && ___m_moveDir.magnitude == 0)
+				bool equipmentAnimating = ___m_actionAnimation != null;
+
+				if (___m_actionQueue.Exists(item => (item.m_type == Player.MinorActionData.ActionType.Equip || item.m_type == Player.MinorActionData.ActionType.Unequip)))
+				{
+					equipmentAnimating = true;
+				}
+
+				if (ZInput.ToggleRun && !SprintTogglePersistsOnHalt.Value && !equipmentAnimating && ___m_moveDir.magnitude == 0)
 				{
 					SprintSet = false;
 				}
 
-				if (!ZInput.ToggleRun && (SprintToggle.Value || SprintToggleOnAutorun.Value) && !SprintTogglePersistsOnHalt.Value && ___m_moveDir.magnitude == 0)
+				if (!ZInput.ToggleRun && (SprintToggle.Value || SprintToggleOnAutorun.Value) && !equipmentAnimating && !SprintTogglePersistsOnHalt.Value && ___m_moveDir.magnitude == 0)
 				{
 					SprintSet = false;
 				}
@@ -199,12 +206,6 @@ namespace ValheimMovementMods
 					___m_autoRun = false;
 				}
 
-				bool equipmentAnimating = ___m_actionAnimation != null;
-
-				if (___m_actionQueue.Exists(item => (item.m_type == Player.MinorActionData.ActionType.Equip || item.m_type == Player.MinorActionData.ActionType.Unequip)))
-				{
-					equipmentAnimating = true;
-				}
 				if (AutorunSet && AutorunOverride.Value && directionalDown)
 				{
 					AutorunSet = false;
