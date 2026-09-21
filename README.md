@@ -1,6 +1,6 @@
 # Valheim - Toggle Movement Mod (ToMoMo)
 
-**_Works with Ashlands Update!_**
+**_Works with Deep North Update!_**
 
 Have you ever played so much Valheim that you injured yourself? Well, I did. When Mistlands released, I bounded over the new and difficult terrain for so many hours mashing my `Shift` key that I experienced what I can only describe as "Valheim pinkie." Basically, I suffered an RSI that forced me to take a break. That's when I knew I needed to make this mod!
 
@@ -113,7 +113,8 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
-* 1.4.4 Valheim 1.0 Deep North support. Pin latest BepInEx. Tweak default TrackElapsedZeroStamTime from 5 seconds to 2 seconds
+* 1.4.5 RunToCrouchToggle now will only set crouch-mode when moving and NOT building/repairing/swimming. This should help this mod play nicer with others
+* 1.4.4 Valheim 1.0 Deep North support. Pin latest BepInEx. Tweak default TrackElapsedZeroStamTime from 5 seconds to 2 seconds. Fix bug while reloading crossbow that cancelled sprint
 * 1.4.3 Patch 0.221.10 fix. Remove vanilla Auto-run setting labels from Gameplay and Accessibility menus. Removes AddAutorunMenuLabels config option. Implementation was brittle and not necessary
 * 1.4.2 Clean up debugging logging
 * 1.4.1 Fix auto-sneak bug that got stuck at the stam regen threshold
