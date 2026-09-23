@@ -16,7 +16,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "1.4.5";
+		const string pluginVersion = "1.4.6";
 		const string freeLookKey = "FreeLook";
 		const string sprintKey = "Sprint";
 
@@ -37,6 +37,7 @@ namespace ValheimMovementMods
 		public static ConfigEntry<string> SprintToggleAlternateKey;
 		public static ConfigEntry<bool> SprintToggleOnAutorun;
 		public static ConfigEntry<bool> SprintTogglePersistsOnHalt;
+		public static ConfigEntry<bool> SprintPreserveThroughWeaponsSwitch;
 		public static ConfigEntry<bool> DisableStamLimitOnManualCntrl;
 		public static ConfigEntry<bool> AutorunOverride;
 		public static ConfigEntry<string> AutorunFreelookKey;
@@ -72,6 +73,9 @@ namespace ValheimMovementMods
 		public static ItemDrop.ItemData EquippedItem = null;
 		public static ItemDrop.ItemData ReequipItem = null;
 
+		public static int EquipmentAnimDebounceFrames = 0;
+		public static int GracePeriodFrames = 5;
+
 		void Awake()
 		{
 			_plugin = this;
@@ -79,7 +83,8 @@ namespace ValheimMovementMods
 			EnableToggle = Config.Bind<bool>("Mod Config", "Enable", true, "Enable this mod");
 			SprintToggle = Config.Bind<bool>("Sprint", "SprintToggle", true, "Sprint works like a toggle when true");
 			SprintToggleOnAutorun = Config.Bind<bool>("Sprint", "OnlyToggleWhenAutorunning", false, "Sprint only works like a toggle when auto-running");
-			SprintTogglePersistsOnHalt = Config.Bind<bool>("Sprint", "SprintTogglePersistsOnHalt", false, "Sprint stays toggled even after character halts");
+            SprintTogglePersistsOnHalt = Config.Bind<bool>("Sprint", "SprintTogglePersistsOnHalt", false, "Sprint stays toggled even after character halts");
+			SprintPreserveThroughWeaponsSwitch = Config.Bind<bool>("Sprint", "SprintPreserveThroughWeaponsSwitch", true, "Sprint stays toggled through weapons switch even though animation briefly halts character");
 			SprintToggleAlternate = Config.Bind<bool>("Sprint", "SprintToggleAlternate", false, "Sprint is toggled through use of another key/button");
 			SprintToggleAlternateKey = Config.Bind<string>("Sprint", "SprintToggleAlternateKey", "T", "Used in conjunction with SprintToggleAlternate. This is the key used to toggle sprint on/off");
 			AutorunOverride = Config.Bind<bool>("Auto-run", "AutorunToggle", true, "Fixes auto-run to follow look direction");
@@ -199,7 +204,17 @@ namespace ValheimMovementMods
 					equipmentAnimating = true;
 				}
 
-				if (ZInput.ToggleRun && !SprintTogglePersistsOnHalt.Value && !equipmentAnimating && ___m_moveDir.magnitude == 0)
+				if (SprintPreserveThroughWeaponsSwitch.Value && equipmentAnimating)
+				{
+					EquipmentAnimDebounceFrames = GracePeriodFrames;
+				}
+
+				if(EquipmentAnimDebounceFrames > 0)
+				{
+					EquipmentAnimDebounceFrames--;
+				}
+
+				if (ZInput.ToggleRun && !SprintTogglePersistsOnHalt.Value && !equipmentAnimating && ___m_moveDir.magnitude == 0 && EquipmentAnimDebounceFrames <= 0)
 				{
 					SprintSet = false;
 				}

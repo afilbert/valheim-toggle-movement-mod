@@ -82,6 +82,7 @@ Configuration allows:
 * **SprintToggleAlternate**, Sprint is toggled through use of another key/button, default: false
 * **SprintToggleAlternateKey**, Used in conjunction with SprintToggleAlternate. This is the key used to toggle sprint on/off, default: T
 * **SprintTogglePersistsOnHalt**, Sprint stays toggled even after character halts, default: false
+* **SprintPreserveThroughWeaponsSwitch**, Sprint stays toggled through weapons switch even though animation briefly halts character, default: true
 * **AutoJumpToggle**, Enables character jump input to function as a toggle with stamina safeguards, default: false
 * **AutoPrimaryAttackToggle**, Enables character primary attack input to function as a toggle with stamina safeguards, default: false
 * **AutorunToggle**, Fixes auto-run to follow look, default: true
@@ -113,6 +114,7 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 1.4.6 Fix sprint detoggling while switching weapons. Adds SprintPreserveThroughWeaponsSwitch config toggle, which by default prevents character from exiting sprint while switching weapons if SprintTogglePersistsOnHalt is disabled. This restores default expected behavior while allowing the unintended behavior to live on through a config option
 * 1.4.5 RunToCrouchToggle now will only set crouch-mode when moving and NOT building/repairing/swimming. This should help this mod play nicer with others
 * 1.4.4 Valheim 1.0 Deep North support. Pin latest BepInEx. Tweak default TrackElapsedZeroStamTime from 5 seconds to 2 seconds. Fix bug while reloading crossbow that cancelled sprint
 * 1.4.3 Patch 0.221.10 fix. Remove vanilla Auto-run setting labels from Gameplay and Accessibility menus. Removes AddAutorunMenuLabels config option. Implementation was brittle and not necessary
