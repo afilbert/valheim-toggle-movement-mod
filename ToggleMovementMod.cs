@@ -16,7 +16,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "1.4.6";
+		const string pluginVersion = "1.4.7";
 		const string freeLookKey = "FreeLook";
 		const string sprintKey = "Sprint";
 
@@ -26,8 +26,6 @@ namespace ValheimMovementMods
 		public static ToggleMovementMod _plugin;
 		public static ZInput _inputInstance;
 		public static Dictionary<string, ZInput.ButtonDef> _buttonsDict;
-
-		private const float VelocityThreshold = 0.001f;
 
 		public static bool Started = false;
 
@@ -66,7 +64,7 @@ namespace ValheimMovementMods
 
 		public static bool StaminaRefilling = false, JumpStamRefilling = false, SprintSet = false, AutorunSet = false;
 		public static bool Crouching = false, GameplaySettingAutorun = false, AutoJumpSet = false;
-		public static bool Swimming = false, Building = false, Repairing = false, Moving = false;
+		public static bool Swimming = false, Building = false, Repairing = false;
 		public static bool AttackStamRefilling = false, AutoPrimaryAttackSet = false;
 		public static float ElapsedTimeAtZeroStam = 0f, StamRefillThreshold = 0f, SprintHealthThreshold = 0f;
 
@@ -124,7 +122,6 @@ namespace ValheimMovementMods
 			private static void Prefix(ref Player __instance, ref Vector3 movedir, ref bool attack, ref bool run, ref bool crouch, ref Vector3 ___m_lookDir, ref Vector3 ___m_moveDir, ref bool ___m_autoRun, ref bool ___m_crouchToggled, ref string ___m_actionAnimation, ref List<Player.MinorActionData> ___m_actionQueue)
 			{
 				Vector3 playerVel = __instance.GetVelocity();
-				Moving = playerVel.sqrMagnitude >= VelocityThreshold;
 				Building = __instance.InPlaceMode();
 				Repairing = __instance.InRepairMode();
 				Swimming = __instance.IsSwimming();
@@ -492,7 +489,7 @@ namespace ValheimMovementMods
 						SprintSet = !SprintSet;
 					}
 				}
-				if (crouch && RunToCrouchToggle.Value && Moving && !Building && !Repairing && !Swimming)
+				if (crouch && RunToCrouchToggle.Value && !Building && !Repairing && !Swimming)
 				{
 					Crouching = !Crouching;
 				}
