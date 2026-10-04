@@ -114,6 +114,7 @@ Built with [BepInEx](https://valheim.thunderstore.io/package/denikson/BepInExPac
 
 Releases in github repo are packaged for Thunderstore Mod Manager.
 
+* 1.4.8 Fix, prevent auto-run from toggling while map is open
 * 1.4.7 Fix regression introduced by 1.4.5, unable to exit crouch if entered while moving
 * 1.4.6 Fix sprint detoggling while switching weapons. Adds SprintPreserveThroughWeaponsSwitch config toggle, which by default prevents character from exiting sprint while switching weapons if SprintTogglePersistsOnHalt is disabled. This restores default expected behavior while allowing the unintended behavior to live on through a config option
 * 1.4.5 RunToCrouchToggle now will only set crouch-mode when moving and NOT building/repairing/swimming. This should help this mod play nicer with others

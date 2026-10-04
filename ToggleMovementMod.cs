@@ -16,7 +16,7 @@ namespace ValheimMovementMods
 	{
 		const string pluginGUID = "afilbert.ValheimToggleMovementMod";
 		const string pluginName = "Valheim - Toggle Movement Mod";
-		const string pluginVersion = "1.4.7";
+		const string pluginVersion = "1.4.8";
 		const string freeLookKey = "FreeLook";
 		const string sprintKey = "Sprint";
 
@@ -470,7 +470,7 @@ namespace ValheimMovementMods
 				{
 					SprintSet = false;
 				}
-				if (autoRun && AutorunOverride.Value)
+				if (autoRun && AutorunOverride.Value && !Minimap.IsOpen())
 				{
 					AutorunSet = !AutorunSet;
 				}
